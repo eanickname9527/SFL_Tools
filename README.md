@@ -14,7 +14,7 @@
 <br>
 <br>
 
-![卡片模擬器示意圖](/screenshot/multi_html.jpg)
+![卡片模擬器示意圖](/screenshot/tool_page.jpg)
 
 <br>
 <br>
