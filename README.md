@@ -14,12 +14,12 @@
 <br>
 <br>
 
-![卡片模擬器示意圖](/screenshot/tool_page.jpg)
+![入口網站示意圖](/screenshot/tool_page.jpg)
 
 <br>
 <br>
 
-![遊戲本體示意圖](/scrennshot/tool_page.jpg)
+![遊戲本體示意圖](/screenshot/game_main.jpg)
 
 <br>
 <br>
