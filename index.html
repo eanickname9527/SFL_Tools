@@ -11,7 +11,7 @@
     <meta name="keywords" content="SFL, SFL_Tools, 副本模擬器, 卡片圖鑑, 技能升級效益, 創世命路">
 
     <!-- CSS Versioning Query String for Cache-Busting -->
-    <link rel="stylesheet" href="css/style.css?v=a6aad08">
+    <link rel="stylesheet" href="css/style.css?v=87999f6">
 </head>
 
 <body>
@@ -47,7 +47,9 @@
                     <button title="多人副本模擬">
                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
                         </svg>
                         <span>多人副本模擬</span>
                     </button>
@@ -56,8 +58,7 @@
                     <button title="技能效益優化">
                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6">
                             </path>
                         </svg>
                         <span>技能效益優化</span>
@@ -68,7 +69,7 @@
                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
                             </path>
                         </svg>
                         <span>卡片資料庫</span>
@@ -87,20 +88,6 @@
                 </div>
 
                 <div class="home-grid">
-                    <div class="lobby-card" onclick="switchView('cards')">
-                        <div class="lobby-icon">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                                </path>
-                            </svg>
-                        </div>
-                        <h3>SFL 卡片圖鑑</h3>
-                        <p>收錄了SFL遊戲的卡片資料庫，可以簡易查看和分類排序卡片。</p>
-                        <span class="lobby-btn">進入工具 &rarr;</span>
-                    </div>
-
                     <div class="lobby-card" onclick="switchView('dungeons')">
                         <div class="lobby-icon">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
@@ -125,6 +112,20 @@
                         </div>
                         <h3>技能效益計算機</h3>
                         <p>自由設定敵人雙屬性，創世命路(元素掌控 I/II)加成與提妮絲輔助，生成最具升級性價比的技能排行清單。</p>
+                        <span class="lobby-btn">進入工具 &rarr;</span>
+                    </div>
+
+                    <div class="lobby-card" onclick="switchView('cards')">
+                        <div class="lobby-icon">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                                </path>
+                            </svg>
+                        </div>
+                        <h3>SFL 卡片圖鑑</h3>
+                        <p>收錄了SFL遊戲的卡片資料庫，可以簡易查看和分類排序卡片。</p>
                         <span class="lobby-btn">進入工具 &rarr;</span>
                     </div>
                 </div>
@@ -566,16 +567,23 @@
 
                             <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
                                 <div class="filter-group" style="min-width: 250px;">
-                                    <span style="color: var(--text-dim); font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: block;">1. 選擇備份檔案 (.sfl)</span>
+                                    <span
+                                        style="color: var(--text-dim); font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: block;">1.
+                                        選擇備份檔案 (.sfl)</span>
                                     <label for="import-sfl-input" class="custom-file-upload">
-                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                                            </path>
                                         </svg>
                                         <span>選擇備份檔案</span>
                                     </label>
                                     <input type="file" id="import-sfl-input" accept=".sfl" style="display: none;">
                                 </div>
-                                <div id="sfl-filename" style="font-size: 0.9rem; color: #7eeff3; font-weight: 600; margin-top: 18px;"></div>
+                                <div id="sfl-filename"
+                                    style="font-size: 0.9rem; color: #7eeff3; font-weight: 600; margin-top: 18px;">
+                                </div>
                             </div>
 
                             <div
@@ -750,7 +758,7 @@
             <!-- Global Premium Footer -->
             <footer class="main-footer">
                 <div class="footer-content">
-                    <div>Version: <span id="lastUpdated">a6aad08</span> | Released: 2026-05-19 13:46</div>
+                    <div>Version: <span id="lastUpdated">87999f6</span> | Released: 2026-05-19 13:53</div>
                 </div>
             </footer>
 
@@ -761,19 +769,19 @@
     <div class="toast" id="toast-message">系統已成功保存變更！</div>
 
     <!-- Load unified database configurations from data/ folder -->
-    <script src="data/skills/attribute.js?v=a6aad08"></script>
-    <script src="data/skills/skills.js?v=a6aad08"></script>
-    <script src="data/cards/equips.js?v=a6aad08"></script>
-    <script src="data/cards/sort.js?v=a6aad08"></script>
-    <script src="data/character/genesis.js?v=a6aad08"></script>
-    <script src="data/multi_dungeon/enemy.js?v=a6aad08"></script>
+    <script src="data/skills/attribute.js?v=87999f6"></script>
+    <script src="data/skills/skills.js?v=87999f6"></script>
+    <script src="data/cards/equips.js?v=87999f6"></script>
+    <script src="data/cards/sort.js?v=87999f6"></script>
+    <script src="data/character/genesis.js?v=87999f6"></script>
+    <script src="data/multi_dungeon/enemy.js?v=87999f6"></script>
 
     <!-- Load modular JS logics -->
-    <script src="js/app.js?v=a6aad08"></script>
-    <script src="js/cards.js?v=a6aad08"></script>
-    <script src="js/loadout.js?v=a6aad08"></script>
-    <script src="js/dungeon.js?v=a6aad08"></script>
-    <script src="js/skills.js?v=a6aad08"></script>
+    <script src="js/app.js?v=87999f6"></script>
+    <script src="js/cards.js?v=87999f6"></script>
+    <script src="js/loadout.js?v=87999f6"></script>
+    <script src="js/dungeon.js?v=87999f6"></script>
+    <script src="js/skills.js?v=87999f6"></script>
 
 </body>
 
