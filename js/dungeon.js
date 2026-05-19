@@ -11,7 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentEnemy = null;
     let isSimulationRunning = false;
 
-    const getStorageKey = (p) => `sfl_battle_stats_${p}`;
+    const getStorageKey = (p) => {
+        const pathPrefix = window.location.pathname.replace(/\/[^\/]*$/, '/');
+        return `sfl_${pathPrefix}_battle_stats_${p}`;
+    };
 
     const BASE_ATTRIBUTES = {
         hp: 5, attack: 20, luck: 10, atk_speed: 100,
