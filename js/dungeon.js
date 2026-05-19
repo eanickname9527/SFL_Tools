@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         atk_speed: 1000,
         shield_pen: 1100,
         // Skill Levels Default
-        '斬擊': 0, '火球術': 0, '暗影突襲': 0, '緊急治療': 0, '狂戰': 20,
+        '斬擊': 0, '火球術': 0, '暗影突襲': 0, '緊急治療': 0, '狂戰': 20, '閃避': 0,
         '烈火箭': 0, '石破': 0, '詛咒打擊': 0, '毒刃': 0, '烈焰劍': 0,
         '靈性冥視': 0, '狂雷擊': 0, '元素匯聚': 0, '酸液噴射': 0, '聖光之杖': 0,
         '終極一擊': 70, '神聖護盾': 0, '大治療術': 0, '曙光': 0, '潮汐一斬': 0,
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         attr: s.type === 'invincible' ? '抵禦' : (s.type === 'support' ? '輔助' : '增益'),
                         ub: ub,
                         cd: s.cd || 0,
-                        effect: s.effectType === 'accuracy' ? 'hit_rate' : (s.effectType || s.type),
+                        effect: s.effectType === 'accuracy' ? 'hit_rate' : (s.effectType === 'evade' ? 'evasion' : (s.effectType === 'atk_speed' ? 'speed' : (s.effectType || s.type))),
                         multi: multiFn,
                         dur: s.round || 3,
                         type: s.type,
@@ -594,7 +594,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!target.activeDebuffs) return 1.0;
         let multi = 1.0;
         target.activeDebuffs.forEach(d => {
-            if (d.attr === attr) multi *= (1 - d.effect);
+            let dAttr = d.attr;
+            if (dAttr === 'atk_speed') dAttr = 'speed';
+            if (dAttr === 'evade') dAttr = 'evasion';
+            if (dAttr === attr) multi *= (1 - d.effect);
         });
         return multi;
     };
@@ -603,7 +606,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!target.activeBuffs) return 1.0;
         let multi = 1.0;
         target.activeBuffs.forEach(b => {
-            if (!b.pending && b.effect === attr) multi *= b.value;
+            let bEffect = b.effect;
+            if (bEffect === 'atk_speed') bEffect = 'speed';
+            if (bEffect === 'evade') bEffect = 'evasion';
+            if (!b.pending && bEffect === attr) multi *= b.value;
         });
         return multi;
     };
