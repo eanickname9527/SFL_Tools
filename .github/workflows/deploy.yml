@@ -1,0 +1,36 @@
+name: Auto Update Version and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Inject Commit SHA and Date
+        run: |
+          # 取得 Git Commit 的短 Hash (7碼)
+          SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-7)
+          # 取得台北時間 (UTC+8) 並格式化
+          RELEASE_DATE=$(TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M')
+          
+          echo "注入版本號: ${SHORT_SHA}"
+          echo "注入時間: ${RELEASE_DATE}"
+          
+          # 替換 index.html 中的佔位符
+          sed -i "s/{{COMMIT_SHA}}/${SHORT_SHA}/g" index.html
+          sed -i "s/{{RELEASE_DATE}}/${RELEASE_DATE}/g" index.html
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: . # 部署根目錄內容
+          branch: gh-pages # 部署到 gh-pages 分支
