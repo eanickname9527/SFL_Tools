@@ -14,11 +14,15 @@
 <br>
 <br>
 工具入口網站<br>
+
 ![入口網站示意圖](/screenshot/tool_page.jpg)
+
 <br>
 <br>
 遊戲本體<br>
+
 ![遊戲本體示意圖](/screenshot/game_main.jpg)
+
 <br>
 <br>
 
