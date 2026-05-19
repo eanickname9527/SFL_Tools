@@ -3,6 +3,12 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Helper to prevent Same-Origin localStorage pollution on shared domains (like GitHub Pages)
+    const getStorageKey = (key) => {
+        const pathPrefix = window.location.pathname.replace(/\/[^\/]*$/, '/');
+        return `sfl_${pathPrefix}_${key}`;
+    };
+
     // 1. Navigation View Switcher Logic
     const navItems = document.querySelectorAll('.nav-item');
     const viewSections = document.querySelectorAll('.view-section');
@@ -25,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Save view state
-        localStorage.setItem('sfl_last_view', viewId);
+        localStorage.setItem(getStorageKey('last_view'), viewId);
 
         // Scroll to top on view switch
         if (!isInit) {
@@ -53,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.switchView = switchView;
 
     // Restore last visited view (default to 'home')
-    const lastView = localStorage.getItem('sfl_last_view') || 'home';
+    const lastView = localStorage.getItem(getStorageKey('last_view')) || 'home';
     switchView(lastView, true);
 
     // Collapsible Sidebar Toggle and State Persistence
@@ -61,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarToggleBtn = document.getElementById('sidebar-toggle');
     
     // Restore state from localStorage (Defaults to collapsed/true if first visit)
-    const storedState = localStorage.getItem('sfl_sidebar_collapsed');
+    const storedState = localStorage.getItem(getStorageKey('sidebar_collapsed'));
     if (storedState === 'false') {
         if (appContainer) appContainer.classList.remove('sidebar-collapsed');
     } else {
@@ -72,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sidebarToggleBtn && appContainer) {
         sidebarToggleBtn.addEventListener('click', () => {
             appContainer.classList.toggle('sidebar-collapsed');
-            localStorage.setItem('sfl_sidebar_collapsed', appContainer.classList.contains('sidebar-collapsed'));
+            localStorage.setItem(getStorageKey('sidebar_collapsed'), appContainer.classList.contains('sidebar-collapsed'));
         });
     }
 
