@@ -96,27 +96,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 const elNames = (s.element || []).map(e => mapObj[e] || e).join('、');
 
                 const multiFn = (lv, stats) => {
-                    if (s.id === 'elemental_focus' || s.id === 'elemental_focus_strong') {
-                        const base = s.id === 'elemental_focus_strong' ? 15 : 10;
-                        const growth = s.id === 'elemental_focus_strong' ? 0.10 : 0.06;
+                    if (s.id === 'elemental_convergence' || s.id === 'elemental_convergence_2') {
+                        const isStrong = s.id === 'elemental_convergence_2';
+                        const base = isStrong ? 15 : 10;
+                        const growth = isStrong ? 0.10 : 0.06;
                         return (1.00 + (lv - 1) * growth) * base * (stats?.luck || 0);
                     }
                     return s.multiplier + (lv - 1) * (s.multiplierperlvl || 0);
                 };
 
-                const ub = s.waitRound || 0;
+                const waitRound = 0; // 此戰鬥系統不採用，強制保持為 0
 
                 if (s.id === 'normal_attack' || s.name === '普攻') {
-                    attack['普攻'] = { attr: '無', ub: 0, cd: 0, multi: 1, cri: false, type: 'atk' };
+                    attack['普攻'] = { attr: '無', waitRound: 0, cd: 0, multi: 1, cri: false, type: 'atk' };
                 }
 
                 if (['atk', 'debuff_atk', 'dot_atk', 'damage_shield', 'control', 'pursuit'].includes(s.type)) {
                     attack[s.name] = {
-                        attr: (s.id === 'elemental_focus' || s.id === 'elemental_focus_strong') ? '特殊' : elNames,
-                        ub: ub,
+                        attr: (s.id === 'elemental_convergence' || s.id === 'elemental_convergence_2') ? '特殊' : elNames,
+                        waitRound: waitRound,
                         cd: s.cd || 0,
                         multi: multiFn,
                         type: s.type,
+                        true_damage: s.true_damage || false,
                         raw: s
                     };
                     if (s.type === 'debuff_atk' && s.debuff) {
@@ -130,18 +132,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (['buff', 'invincible', 'support'].includes(s.type)) {
                     buff[s.name] = {
                         attr: s.type === 'invincible' ? '抵禦' : (s.type === 'support' ? '輔助' : '增益'),
-                        ub: ub,
+                        waitRound: waitRound,
                         cd: s.cd || 0,
                         effect: s.effectType === 'accuracy' ? 'hit_rate' : (s.effectType === 'evade' ? 'evasion' : (s.effectType === 'atk_speed' ? 'speed' : (s.effectType || s.type))),
                         multi: multiFn,
                         dur: s.round || 3,
                         type: s.type,
+                        true_damage: s.true_damage || false,
                         raw: s
                     };
                 } else if (s.type === 'heal') {
                     heal[s.name] = {
                         attr: '治療',
-                        ub: ub,
+                        waitRound: waitRound,
                         cd: s.cd || 0,
                         multi: multiFn
                     };
@@ -151,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Guarantee 普攻 exists just in case
         if (!attack['普攻']) {
-            attack['普攻'] = { attr: '無', ub: 0, cd: 0, multi: 1, cri: false, type: 'atk' };
+            attack['普攻'] = { attr: '無', waitRound: 0, cd: 0, multi: 1, cri: false, type: 'atk' };
         }
 
         window.ATTACK_SKILLS_DATA = attack;
@@ -377,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const input = document.getElementById(key);
             if (input) {
                 if (input.type === 'number') {
-                    stats[key] = input.value !== '' ? Number(input.value) : DEFAULT_STATS[key];
+                    stats[key] = input.value !== '' ? Number(input.value) : 0;
                 } else {
                     stats[key] = input.value;
                 }
@@ -836,9 +839,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 battleLog(`[玩家 ${actor.id}] ❌ ${ps.name} 蓄力被擊中中斷！`, 'fail');
                             }
                             p.pendingSkill = null;
-                            continue;
-                        } else {
-                            continue;
                         }
                     }
 
@@ -848,14 +848,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     const eEva = e.evasion * getDebuffMulti(e, 'evasion');
                     const currentEMitigation = Math.min(Math.max(0, ((e.shield || 0) - (p.shield_pen || 0)) * 0.001), 0.99);
 
-                    const available = p.ownedSkills.filter(s => (p.skillCDs[s.name] || 0) === 0);
+                    const available = p.ownedSkills.filter(s => {
+                        if ((p.skillCDs[s.name] || 0) > 0) return false;
+                        if (s.type === 'heal') {
+                            // 必須有任何一個存活玩家的血量未滿才可使用治療技能
+                            const hasDamagedPlayer = activePlayers.some(tp => tp.hp > 0 && tp.hp < tp.maxHp);
+                            if (!hasDamagedPlayer) return false;
+                        }
+                        return true;
+                    });
                     let skillToUse = available.length > 0 ? available[Math.floor(Math.random() * available.length)] : { name: '普攻', lv: 1, data: window.ATTACK_SKILLS_DATA['普攻'], type: 'attack' };
                     const sData = skillToUse.data;
                     const pHitRate = (p.hit_rate || 100) * getBuffMulti(p, 'hit_rate');
                     let p_hit = pHitRate - eEva - ((e.luck || 0) * 0.004);
 
-                    // Safe Check for 'all elements' or real damage skills (guaranteed hit)
-                    if (sData && (sData.attr && sData.attr.includes('全') || skillToUse.name === '元素匯聚' || skillToUse.name === '元素匯聚．強')) {
+                    // 取得屬性攻防特性判定資料
+                    let attrChars = { guaranteed_hit: false, true_damage: false, ignore_shield: false, level_diff_max: false };
+                    if (typeof window.getAttributeCombatCharacteristics === 'function' && sData && sData.attr) {
+                        attrChars = window.getAttributeCombatCharacteristics(sData.attr, e.attribute);
+                    }
+
+                    // 判定必中技能與特性必定命中 (guaranteed hit，真實傷害亦視為必定命中)
+                    if (attrChars.guaranteed_hit || attrChars.true_damage || (sData && sData.true_damage)) {
                         p_hit = 1000;
                     }
 
@@ -890,11 +904,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (skillToUse.name === '元素匯聚' || skillToUse.name === '元素匯聚．強') {
                             p.pendingSkill = { name: skillToUse.name, lv: skillToUse.lv, data: sData, countdown: 2, damageTaken: 0 };
                             if (verbose) battleLog(`[玩家 ${actor.id}] 🌀 開始引導蓄力 ${skillToUse.name}...`, 'info');
+                            p.skillCDs[skillToUse.name] = (sData.cd || 0) + 1;
                         } else {
+                            if (skillToUse.name !== '普攻') {
+                                p.skillCDs[skillToUse.name] = (sData.cd || 0) + 1;
+                            }
                             let sMulti = typeof sData.multi === 'function' ? sData.multi(skillToUse.lv, p) : (sData.multi || 1.0);
                             const attrMulti = getFinalAttrMulti(sData.attr, e.attribute);
                             const currentPAtkMulti = Math.max(1, Math.floor((p.atk_speed * getBuffMulti(p, 'speed') * getDebuffMulti(p, 'speed')) / (eSpeed || 1)));
-                            let damage = pAtk * sMulti * (1 + (p.bonus_dmg || 0) / 100) * currentPAtkMulti * p.lvMulti * attrMulti * (1 - currentEMitigation);
+
+                            // 依據屬性特性計算傷害
+                            let damage;
+                            if (attrChars.true_damage) {
+                                // 真實傷害：必定命中，且無視所有傷害加成增減 (如增傷、攻速比例、等級差倍率、屬性克制、護盾減免)
+                                damage = pAtk * sMulti;
+                            } else {
+                                const finalEMitigation = attrChars.ignore_shield ? 0 : currentEMitigation;
+                                const finalLvMulti = attrChars.level_diff_max ? 1.5 : p.lvMulti;
+                                damage = pAtk * sMulti * (1 + (p.bonus_dmg || 0) / 100) * currentPAtkMulti * finalLvMulti * attrMulti * (1 - finalEMitigation);
+                            }
+                            damage = Math.max(1, Math.floor(damage));
 
                             const prevHp = e.hp;
                             e.hp -= damage;
@@ -974,7 +1003,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     } else {
                         if (verbose) battleLog(`[玩家 ${actor.id}] 使用 ${skillToUse.name} 攻擊，但被 BOSS 閃避！`, 'fail');
-                        p.skillCDs[skillToUse.name] = (sData.cd || 0) + 1;
+                        if (skillToUse.name !== '普攻') {
+                            p.skillCDs[skillToUse.name] = (sData.cd || 0) + 1;
+                        }
                     }
                 } else {
                     // BOSS Action Loop
@@ -984,16 +1015,36 @@ document.addEventListener('DOMContentLoaded', () => {
                     let selectedSkill = availableSkills.length > 0 ? availableSkills[Math.floor(Math.random() * availableSkills.length)] : { name: '普攻', multi: 1.0, type: 'single' };
 
                     const executeEnemyHit = (tp, pIdx, skill) => {
+                        // 取得 BOSS 攻擊屬性特性判定資料 (支援 skill.attribute 與 e.attribute 雙層回退機制)
+                        let eAttrChars = { guaranteed_hit: false, true_damage: false, ignore_shield: false, level_diff_max: false };
+                        const bossAtkAttr = skill.attribute || e.attribute || '無';
+                        if (typeof window.getAttributeCombatCharacteristics === 'function') {
+                            eAttrChars = window.getAttributeCombatCharacteristics(bossAtkAttr, tp.attribute || '無');
+                        }
+
                         const pEva = tp.evasion * getDebuffMulti(tp, 'evasion') * getBuffMulti(tp, 'evasion');
                         let e_hit = (e.hit_rate || 100) - pEva - ((tp.luck || 0) * 0.004);
-                        if (Math.random() * 100 < Math.max(2, e_hit)) {
-                            const attrMulti = getFinalAttrMulti(e.attribute, '無') || 1.0;
-                            const diff = e.level - tp.level;
-                            const eLvMultiForP = diff >= 7 ? 1.5 : (diff <= -7 ? 0.5 : 1.0 + (diff * (0.5 / 7)));
-                            const skillMulti = skill.multi || skill.damage || 1.0;
-                            const currentPMitigation = hasBuff(tp, 'invincible') ? 1.0 : tp.mitigation;
 
-                            let damage = eAtk * skillMulti * eLvMultiForP * attrMulti * (1 - currentPMitigation);
+                        // 判斷是否必定命中或符合命中機率 (真實傷害亦視為必定命中)
+                        const isHit = eAttrChars.guaranteed_hit || eAttrChars.true_damage || (Math.random() * 100 < Math.max(2, e_hit));
+
+                        if (isHit) {
+                            const attrMulti = getFinalAttrMulti(bossAtkAttr, '無') || 1.0;
+                            const diff = e.level - tp.level;
+                            const skillMulti = skill.multi || skill.damage || 1.0;
+
+                            // 依據屬性特性計算傷害
+                            let damage;
+                            if (eAttrChars.true_damage) {
+                                // 真實傷害：必定命中，且無視所有傷害加成增減
+                                damage = eAtk * skillMulti;
+                            } else {
+                                // 等差傷害最大化或正常計算
+                                const eLvMultiForP = eAttrChars.level_diff_max ? 1.5 : (diff >= 7 ? 1.5 : (diff <= -7 ? 0.5 : 1.0 + (diff * (0.5 / 7))));
+                                const currentPMitigation = hasBuff(tp, 'invincible') ? 1.0 : tp.mitigation;
+                                const finalPMitigation = hasBuff(tp, 'invincible') ? 1.0 : (eAttrChars.ignore_shield ? 0 : tp.mitigation);
+                                damage = eAtk * skillMulti * eLvMultiForP * attrMulti * (1 - finalPMitigation);
+                            }
                             damage = Math.max(1, Math.floor(damage));
 
                             const prevHp = tp.hp;
@@ -1075,7 +1126,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (verbose) battleLog(`[敵方] 使用 ${selectedSkill.name} 進行修復！恢復 ${Math.floor(healAmt).toLocaleString()} 生命`, 'success');
                         }
                     }
-                    e.skillCDs[selectedSkill.name] = (selectedSkill.cd || 0) + 1;
+                    if (selectedSkill.name !== '普攻') {
+                        e.skillCDs[selectedSkill.name] = (selectedSkill.cd || 0) + 1;
+                    }
                 }
             }
             round++;

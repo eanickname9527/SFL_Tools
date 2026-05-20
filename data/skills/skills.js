@@ -238,6 +238,8 @@ window.SFL_SKILLS_DB = [
         "sort": 14,
         "shield_rounds": 2,
         "damage_threshold": 0.05,
+        "true_damage": true,
+        "damage_type": "true_damage",
         "ultimate_skill": {
             "name": "元素爆發",
             "damage": 10
@@ -426,6 +428,8 @@ window.SFL_SKILLS_DB = [
         "sort": 25,
         "shield_rounds": 2,
         "damage_threshold": 0.05,
+        "true_damage": true,
+        "damage_type": "true_damage",
         "ultimate_skill": {
             "name": "元素爆發．強",
             "damage": 15
@@ -647,7 +651,21 @@ window.SFL_SKILLS_DB = [
         "sort": 37,
         "round": 3,
         "waitRound": 2,
-        "MultipleDisable": true
+        "MultipleDisable": true,
+        // [方案 A] 額外效果配置：採用完全參數化的公式設計，免除動態 eval 執行，易於跨模組/跨語言解析
+        "extra_effect": {
+            "type": "block_status",
+            "effectType": "support",
+            "duration": 3,
+            "block_dot": true,
+            "block_debuff": true,
+            // 抵擋機率模型：線性增長模型。計算公式：base_value + (level - 1) * value_per_level
+            "block_chance": {
+                "calc_type": "linear",
+                "base_value": 0.01,         // 基礎抵擋機率 1% (即 0.01)
+                "value_per_level": 0.01     // 每提升一級額外增加 1% (即 0.01)
+            }
+        }
     },
     {
         "id": "savage_shock",
@@ -664,7 +682,32 @@ window.SFL_SKILLS_DB = [
             "none"
         ],
         "sort": 38,
-        "MultipleDisable": true
+        "MultipleDisable": true,
+        // [方案 A] 額外效果配置：採用完全參數化的公式設計，免除動態 eval 執行，易於跨模組/跨語言解析
+        "extra_effect": {
+            "type": "shock_bondage",
+            "shock_threshold": 28,          // 累積觸發永久降低攻擊力的震盪值臨界點
+            "atk_reduction_limit": 1,       // 降攻效果在單場戰鬥中可被觸發的最大次數限制
+            "bondage_duration": 1,          // 每次觸發束縛效果時無法行動的回合數
+            // 震盪值增加量模型：階梯增長模型。計算公式：Math.floor(base_value + level / step_interval)
+            "shock_increment": {
+                "calc_type": "floor_step",
+                "base_value": 1,            // 基礎增加 1 點震盪值
+                "step_interval": 10         // 每 10 等級使增加量額外加 1 點
+            },
+            // 降低攻擊力比例模型：線性增長模型。計算公式：base_value + (level - 1) * value_per_level
+            "atk_reduction": {
+                "calc_type": "linear",
+                "base_value": 0.3,          // 基礎降低 0.3% 攻擊力
+                "value_per_level": 0.3      // 每提升一級額外降低 0.3% 攻擊力 (滿級 30 等級降低 9.0%)
+            },
+            // 最大可觸發束縛次數模型：階梯增長模型。計算公式：Math.floor(base_value + level / step_interval)
+            "max_bondage_triggers": {
+                "calc_type": "floor_step",
+                "base_value": 0,            // 基礎可束縛次數為 0
+                "step_interval": 10         // 每 10 等級使最大可束縛次數加 1 (滿級 30 等級最多觸發 3 次)
+            }
+        }
     },
     {
         "id": "ultimate_burst",
@@ -681,7 +724,26 @@ window.SFL_SKILLS_DB = [
             "all"
         ],
         "sort": 39,
-        "MultipleDisable": true
+        "MultipleDisable": true,
+        // [方案 A] 額外效果配置：採用完全參數化的公式設計，免除動態 eval 執行，易於跨模組/跨語言解析
+        "extra_effect": {
+            "type": "pursuit_mode",
+            "damage_type": "true_damage",   // 追打造成的傷害類型：真實傷害
+            // 可觸發追打機制的技能類型列表（輸出型技能）
+            "trigger_skills": ["atk", "debuff_atk", "dot_atk", "damage_shield", "control"],
+            // 追擊觸發機率模型：階梯增長模型。計算公式：Math.floor(base_value + level / step_interval)
+            "trigger_chance": {
+                "calc_type": "floor_step",
+                "base_value": 1,            // 基礎觸發機率為 1%
+                "step_interval": 10         // 每 10 等級使觸發機率額外增加 1%
+            },
+            // 追擊真實傷害倍率模型：線性增長模型。計算公式：base_value + (level - 1) * value_per_level
+            "damage_multiplier": {
+                "calc_type": "linear",
+                "base_value": 0.4,          // 基礎傷害倍率為 0.4
+                "value_per_level": 0.4      // 每提升一級額外增加 0.4 傷害倍率
+            }
+        }
     },
     {
         "id": "starfall",
