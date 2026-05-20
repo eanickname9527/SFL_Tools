@@ -238,6 +238,8 @@ window.SFL_SKILLS_DB = [
         "sort": 14,
         "shield_rounds": 2,
         "damage_threshold": 0.05,
+        "true_damage": true,
+        "damage_type": "true_damage",
         "ultimate_skill": {
             "name": "元素爆發",
             "damage": 10
@@ -426,6 +428,8 @@ window.SFL_SKILLS_DB = [
         "sort": 25,
         "shield_rounds": 2,
         "damage_threshold": 0.05,
+        "true_damage": true,
+        "damage_type": "true_damage",
         "ultimate_skill": {
             "name": "元素爆發．強",
             "damage": 15
