@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewId === 'skills' && typeof window.calculateSkillUpgrades === 'function') {
             window.calculateSkillUpgrades();
         }
+        // Note: window.calculateSkillUpgrades is exposed from skills.js
     }
 
     // Bind nav sidebar items click
@@ -138,4 +139,60 @@ document.addEventListener('DOMContentLoaded', () => {
             // Trigger internal refreshes on tab switch
         });
     });
+
+    // 5. Build dynamic skill inputs from SFL_SKILLS_DB
+    function buildSkillInputs() {
+        const container = document.getElementById('skills-inputs-container');
+        if (!container || !window.SFL_SKILLS_DB) return;
+
+        const sorted = [...window.SFL_SKILLS_DB].sort((a, b) => (a.sort || 0) - (b.sort || 0));
+        sorted.forEach(skill => {
+            const div = document.createElement('div');
+            div.className = 'filter-group';
+            const label = document.createElement('label');
+            label.setAttribute('for', skill.name);
+            label.textContent = skill.name;
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.id = skill.name;
+            input.min = '0';
+            input.value = '0';
+            div.appendChild(label);
+            div.appendChild(input);
+            container.appendChild(div);
+        });
+    }
+    buildSkillInputs();
+
+    // 6. Build dynamic card slot rows
+    function buildCardSlots() {
+        const container = document.getElementById('card-slots-container');
+        if (!container) return;
+
+        for (let i = 1; i <= 5; i++) {
+            const row = document.createElement('div');
+            row.className = 'card-slot-row';
+            const label = document.createElement('span');
+            label.className = 'slot-label';
+            label.textContent = `插槽 ${i}`;
+            const cardSelect = document.createElement('select');
+            cardSelect.id = `card-slot-${i}`;
+            cardSelect.className = 'card-db-select';
+            const lvSelect = document.createElement('select');
+            lvSelect.id = `card-lv-${i}`;
+            lvSelect.className = 'card-lv-select';
+            [1, 2, 3, 4, 5].forEach(lv => {
+                const opt = document.createElement('option');
+                opt.value = String(lv);
+                opt.textContent = `等級 ${lv}`;
+                if (lv === 5) opt.selected = true;
+                lvSelect.appendChild(opt);
+            });
+            row.appendChild(label);
+            row.appendChild(cardSelect);
+            row.appendChild(lvSelect);
+            container.appendChild(row);
+        }
+    }
+    buildCardSlots();
 });

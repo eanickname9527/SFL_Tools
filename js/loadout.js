@@ -249,15 +249,7 @@
                 const cardData = window.SFL_CARDS_DB ? window.SFL_CARDS_DB.find(c => c.id === cid) : null;
                 if (cardData && cardData.value && cardData.value["5"]) {
                     const bonus = cardData.value["5"];
-                    if (bonus.hp) finalStats.hp += bonus.hp;
-                    if (bonus.attack) finalStats.attack += bonus.attack;
-                    if (bonus.luck) finalStats.luck += bonus.luck;
-                    if (bonus.atk_speed) finalStats.atk_speed += bonus.atk_speed;
-                    if (bonus.shield) finalStats.shield += bonus.shield;
-                    if (bonus.evade) finalStats.evasion += (bonus.evade * 100);
-                    if (bonus.accuracy) finalStats.hit_rate += (bonus.accuracy * 100);
-                    if (bonus.penetrate) finalStats.shield_pen += bonus.penetrate;
-                    if (bonus.other_bonus) finalStats.bonus_dmg += (bonus.other_bonus * 100);
+                    if (window.applyCardBonusToStats) window.applyCardBonusToStats(finalStats, bonus);
                 }
             });
 

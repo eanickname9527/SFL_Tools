@@ -5,13 +5,11 @@
     --primary: #6366f1;
     --primary-glow: rgba(99, 102, 241, 0.3);
     --accent: #a855f7;
-    --accent-glow: rgba(168, 85, 247, 0.3);
     --bg-dark: #0f172a;
     --bg-glass: rgba(30, 41, 59, 0.7);
     --border-glass: rgba(255, 255, 255, 0.1);
     --text-main: #7eeff3;
     --text-dim: #94a3b8;
-    --card-bg: rgba(30, 41, 59, 0.4);
 
     /* Attribute colors */
     --color-hp: #ef4444;
@@ -22,7 +20,6 @@
     --color-hit: #8b5cf6;
 
     /* Rarity & Chapters */
-    --color-worldboss: #00ec00;
     --color-world_boss: #00ec00;
     --color-event: #f00078;
     --color-ch1: #f9f900;
@@ -160,7 +157,11 @@ body {
 
 .brand {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
     margin-bottom: 40px;
 }
 
@@ -530,6 +531,8 @@ input:focus {
 
 .push-right {
     margin-left: auto;
+    display: flex;
+    gap: 10px;
 }
 
 /* Button UI */
@@ -734,144 +737,6 @@ select option {
     color: var(--text-dim);
 }
 
-.equip-btn {
-    width: 100%;
-    padding: 8px;
-    border-radius: 8px;
-    background: rgba(99, 102, 241, 0.1);
-    color: var(--primary);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.equip-btn:hover {
-    background: rgba(99, 102, 241, 0.2);
-}
-
-.equip-btn:disabled {
-    background: rgba(255, 255, 255, 0.02);
-    color: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.05);
-    cursor: not-allowed;
-}
-
-/* Simulator Workbench */
-.sim-container {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 30px;
-    margin-bottom: 35px;
-}
-
-.sim-slots h2,
-.sim-stats h2 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 20px;
-    border-left: 3px solid var(--primary);
-    padding-left: 12px;
-}
-
-.slots-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.slot {
-    border: 1.5px dashed rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.15);
-    border-radius: 12px;
-    padding: 16px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    min-height: 65px;
-}
-
-.slot.filled {
-    border-style: solid;
-    border-color: var(--border-glass);
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.slot-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.slot-name {
-    font-weight: 600;
-    font-size: 1rem;
-}
-
-.slot-details {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.slot-level {
-    font-size: 0.72rem;
-    background: rgba(99, 102, 241, 0.15);
-    color: var(--primary);
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-.slot-attrs {
-    font-size: 0.75rem;
-    color: var(--text-dim);
-}
-
-.slot-empty-text {
-    color: rgba(255, 255, 255, 0.2);
-    font-size: 1rem;
-}
-
-.remove-btn {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-    padding: 6px 12px;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.remove-btn:hover {
-    background: rgba(239, 68, 68, 0.25);
-}
-
-/* Summed Stats List */
-.stats-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 14px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    border-left: 2px solid var(--primary);
-}
-
-.stat-val {
-    font-weight: 700;
-    color: var(--primary);
-}
-
 .empty-state {
     color: var(--text-dim);
     text-align: center;
@@ -883,6 +748,7 @@ select option {
 .card[data-chapter="world_boss"]::before {
     background: var(--color-world_boss);
 }
+
 .card[data-chapter="world_boss"]:hover {
     border-color: rgba(0, 236, 0, 0.4);
     box-shadow: 0 8px 25px rgba(0, 236, 0, 0.15);
@@ -891,6 +757,7 @@ select option {
 .card[data-chapter="event"]::before {
     background: var(--color-event);
 }
+
 .card[data-chapter="event"]:hover {
     border-color: rgba(240, 0, 120, 0.4);
     box-shadow: 0 8px 25px rgba(240, 0, 120, 0.15);
@@ -899,6 +766,7 @@ select option {
 .card[data-chapter="ch1"]::before {
     background: var(--color-ch1);
 }
+
 .card[data-chapter="ch1"]:hover {
     border-color: rgba(249, 249, 0, 0.4);
     box-shadow: 0 8px 25px rgba(249, 249, 0, 0.15);
@@ -907,6 +775,7 @@ select option {
 .card[data-chapter="ch2"]::before {
     background: var(--color-ch2);
 }
+
 .card[data-chapter="ch2"]:hover {
     border-color: rgba(255, 0, 0, 0.4);
     box-shadow: 0 8px 25px rgba(255, 0, 0, 0.15);
@@ -915,6 +784,7 @@ select option {
 .card[data-chapter="ch3"]::before {
     background: var(--color-ch3);
 }
+
 .card[data-chapter="ch3"]:hover {
     border-color: rgba(210, 0, 210, 0.4);
     box-shadow: 0 8px 25px rgba(210, 0, 210, 0.15);
@@ -1025,11 +895,16 @@ input:checked+.slider:before {
 .card-db-select {
     font-size: 1rem;
     padding: 6px 12px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .card-lv-select {
     font-size: 1rem;
     padding: 6px 8px;
+    flex-shrink: 0;
+    width: 90px;
 }
 
 /* Dungeon list grid */
@@ -1102,7 +977,7 @@ input:checked+.slider:before {
     border-radius: 16px;
     display: flex;
     flex-direction: column;
-    height: 480px;
+    height: 780px;
     overflow: hidden;
 }
 
@@ -1186,65 +1061,6 @@ input:checked+.slider:before {
     background: rgba(255, 255, 255, 0.04);
 }
 
-.skill-rank {
-    position: absolute;
-    top: 14px;
-    right: 18px;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--primary);
-    opacity: 0.6;
-}
-
-.skill-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.skill-name {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--text-main);
-}
-
-.skill-attr {
-    font-size: 0.65rem;
-    background: rgba(99, 102, 241, 0.15);
-    color: var(--primary);
-    padding: 2px 6px;
-    border-radius: 4px;
-}
-
-.skill-stats {
-    display: flex;
-    gap: 12px;
-    font-size: 0.78rem;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-}
-
-.skill-efficiency {
-    margin-top: auto;
-    padding-top: 12px;
-    border-top: 1px solid var(--border-glass);
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-}
-
-.efficiency-label {
-    font-size: 0.7rem;
-    color: var(--text-dim);
-}
-
-.efficiency-value {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--primary);
-}
-
 /* ── Extracted from inline styles in index.html ─────────────────────── */
 
 /* Shared h3 for form section titles (skills, loadout) */
@@ -1276,10 +1092,10 @@ input:checked+.slider:before {
 
 /* SFL filename display */
 #sfl-filename {
-    color: var(--primary);
-    font-size: 1rem;
+    font-size: 0.9rem;
+    color: #7eeff3;
     font-weight: 600;
-    padding-bottom: 10px;
+    margin-top: 18px;
 }
 
 /* Loadout import/export status hint */
@@ -1301,6 +1117,139 @@ input:checked+.slider:before {
 }
 
 /* ── End extracted inline styles ──────────────────────────────────────── */
+
+/* === Additional extracted layout classes === */
+
+#join-toggle-container {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+#detailed-settings-body {
+    display: none;
+    margin-top: 25px;
+    border-top: 1px solid var(--border-glass);
+    padding-top: 25px;
+}
+
+#genesis-bonus-hint {
+    text-align: left;
+    color: var(--primary);
+    font-weight: bold;
+    margin: 0;
+    min-width: 220px;
+}
+
+.grid-4col {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.panel-sep-top {
+    border-top: 1px solid var(--border-glass);
+    padding-top: 20px;
+}
+
+.card-slots-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card-slot-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.slot-label {
+    font-size: 1rem;
+    width: 55px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.form-section-top {
+    margin-bottom: 35px;
+    border-top: 1px solid var(--border-glass);
+    padding-top: 25px;
+}
+
+.skills-input-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.loadout-section {
+    border-top: 1px solid var(--border-glass);
+    padding-top: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.import-file-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+}
+
+.slot-select-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.action-btn-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.skills-bonus-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 35px;
+    padding: 12px 20px;
+    margin-bottom: 25px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.filter-group-inline {
+    margin: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-group-inline label {
+    margin: 0;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.select-inline {
+    width: auto;
+    padding: 4px 10px;
+    height: 34px;
+    margin: 0;
+}
+
+.toggle-hint label {
+    cursor: pointer;
+}
+
+/* === End additional layout classes === */
 
 /* Toast */
 
@@ -1412,10 +1361,6 @@ input:checked+.slider:before {
 
     .main-content {
         margin-left: 80px;
-    }
-
-    .sim-container {
-        grid-template-columns: 1fr;
     }
 }
 

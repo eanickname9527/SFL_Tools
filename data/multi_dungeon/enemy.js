@@ -255,3 +255,8 @@ const ENEMY_DATABASE = [
     }
         */
 ];
+
+// 瀏覽器全域物件掛載
+if (typeof window !== 'undefined') {
+    window.ENEMY_DATABASE = ENEMY_DATABASE;
+}
