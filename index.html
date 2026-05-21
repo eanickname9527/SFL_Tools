@@ -16,11 +16,26 @@
 
 <body>
 
+<!-- SVG Icon Sprite -->
+<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
+    <symbol id="icon-home" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+    </symbol>
+    <symbol id="icon-dungeons" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+    </symbol>
+    <symbol id="icon-skills" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+    </symbol>
+    <symbol id="icon-cards" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+    </symbol>
+</svg>
+
     <div class="app-container sidebar-collapsed">
         <!-- Sidebar Navigation Drawer -->
         <nav class="sidebar" id="app-sidebar">
-            <div class="brand"
-                style="display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;">
+            <div class="brand">
                 <div class="brand-text">
                     <h1>SFL Tools</h1>
                     <span>Tools Portal</span>
@@ -34,44 +49,25 @@
             <ul class="nav-links">
                 <li class="nav-item active" data-view="home">
                     <button title="大廳首頁">
-                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
-                            </path>
-                        </svg>
+                        <svg width="18" height="18" aria-hidden="true"><use href="#icon-home"/></svg>
                         <span>大廳首頁</span>
                     </button>
                 </li>
                 <li class="nav-item" data-view="dungeons">
                     <button title="多人副本模擬">
-                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
-                            </path>
-                        </svg>
+                        <svg width="18" height="18" aria-hidden="true"><use href="#icon-dungeons"/></svg>
                         <span>多人副本模擬</span>
                     </button>
                 </li>
                 <li class="nav-item" data-view="skills">
                     <button title="技能效益優化">
-                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6">
-                            </path>
-                        </svg>
+                        <svg width="18" height="18" aria-hidden="true"><use href="#icon-skills"/></svg>
                         <span>技能效益優化</span>
                     </button>
                 </li>
                 <li class="nav-item" data-view="cards">
                     <button title="卡片資料庫">
-                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                            </path>
-                        </svg>
+                        <svg width="18" height="18" aria-hidden="true"><use href="#icon-cards"/></svg>
                         <span>卡片資料庫</span>
                     </button>
                 </li>
@@ -90,12 +86,7 @@
                 <div class="home-grid">
                     <div class="lobby-card" onclick="switchView('dungeons')">
                         <div class="lobby-icon">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
-                                </path>
-                            </svg>
+                            <svg width="24" height="24" aria-hidden="true"><use href="#icon-dungeons"/></svg>
                         </div>
                         <h3>多人副本模擬器</h3>
                         <p>支援一到三個玩家屬性與技能配置，可使用.sfl 備份存檔載入或匯出。設定配置後切到挑戰多人副本王分頁，進行詳細的回合挑戰或是批次勝率模擬。</p>
@@ -104,11 +95,7 @@
 
                     <div class="lobby-card" onclick="switchView('skills')">
                         <div class="lobby-icon">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6">
-                                </path>
-                            </svg>
+                            <svg width="24" height="24" aria-hidden="true"><use href="#icon-skills"/></svg>
                         </div>
                         <h3>技能效益計算機</h3>
                         <p>自由設定敵人雙屬性，創世命路(元素掌控 I/II)加成與提妮絲輔助，生成最具升級性價比的技能排行清單。</p>
@@ -117,12 +104,7 @@
 
                     <div class="lobby-card" onclick="switchView('cards')">
                         <div class="lobby-icon">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                                </path>
-                            </svg>
+                            <svg width="24" height="24" aria-hidden="true"><use href="#icon-cards"/></svg>
                         </div>
                         <h3>SFL 卡片圖鑑</h3>
                         <p>收錄了SFL遊戲的卡片資料庫，可以簡易查看和分類排序卡片。</p>
@@ -211,8 +193,7 @@
                             </div>
 
                             <!-- Join Battle Toggle for P2, P3 -->
-                            <div class="filter-group" id="join-toggle-container"
-                                style="display: none; flex-direction: row; align-items: center; gap: 8px;">
+                            <div class="filter-group" id="join-toggle-container">
                                 <label for="join-combat-toggle" style="margin-bottom:0; cursor: pointer;">加入多人戰鬥</label>
                                 <label class="switch">
                                     <input type="checkbox" id="join-combat-toggle">
@@ -220,7 +201,7 @@
                                 </label>
                             </div>
 
-                            <div class="push-right" style="display: flex; gap: 10px;">
+                            <div class="push-right">
                                 <!--
                                 <button class="btn secondary" id="reset-btn">恢復預設數值</button>
                                 -->
@@ -233,7 +214,7 @@
                             <div class="section-title-sub">
                                 <span>角色基本屬性屬性</span>
                                 <div class="toggle-hint">
-                                    <label for="detailed-settings-toggle" style="cursor:pointer;">啟用細項加點/卡片計算</label>
+                                    <label for="detailed-settings-toggle">啟用細項加點/卡片計算</label>
                                     <label class="switch">
                                         <input type="checkbox" id="detailed-settings-toggle">
                                         <span class="slider"></span>
@@ -285,13 +266,12 @@
                             </div>
 
                             <!-- Detailed Point allocation and card slots, shown when checkbox checked -->
-                            <div id="detailed-settings-body"
-                                style="display: none; margin-top: 25px; border-top: 1px solid var(--border-glass); padding-top: 25px;">
+                            <div id="detailed-settings-body">
 
                                 <!-- Points allocations (加點) — 上方橫排 -->
-                                <div id="detailed-points-allocation" style="margin-bottom: 25px;">
+                                <div id="detailed-points-allocation">
                                     <h4 style="font-size: 1rem; color: var(--primary); margin-bottom: 12px;">角色加點加成</h4>
-                                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                                    <div class="grid-4col">
                                         <div class="filter-group">
                                             <label for="detail-hp">生命值點數 (加點)</label>
                                             <input type="number" id="detail-hp" value="0">
@@ -312,87 +292,11 @@
                                 </div>
 
                                 <!-- Equipped card slots (卡片插槽細項) — 下方直排，固定寬度防止變形 -->
-                                <div id="card-detailed-settings"
-                                    style="border-top: 1px solid var(--border-glass); padding-top: 20px;">
+                                <div id="card-detailed-settings" class="panel-sep-top">
                                     <h4 style="font-size: 1rem; color: var(--accent); margin-bottom: 12px;">卡片配置設定
                                         (自動算入主能力)</h4>
-                                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                                        <!-- 5 Slot inputs — card-db-select uses min-width:0 + overflow:hidden to stay fixed width -->
-                                        <div style="display: flex; gap: 10px; align-items: center;">
-                                            <span
-                                                style="font-size:1rem; width: 55px; flex-shrink: 0; white-space: nowrap;">插槽
-                                                1</span>
-                                            <select id="card-slot-1" class="card-db-select"
-                                                style="flex: 1; min-width: 0; overflow: hidden;"></select>
-                                            <select id="card-lv-1" class="card-lv-select"
-                                                style="flex-shrink: 0; width: 90px;">
-                                                <option value="1">等級 1</option>
-                                                <option value="2">等級 2</option>
-                                                <option value="3">等級 3</option>
-                                                <option value="4">等級 4</option>
-                                                <option value="5" selected>等級 5</option>
-                                            </select>
-                                        </div>
-                                        <div style="display: flex; gap: 10px; align-items: center;">
-                                            <span
-                                                style="font-size:1rem; width: 55px; flex-shrink: 0; white-space: nowrap;">插槽
-                                                2</span>
-                                            <select id="card-slot-2" class="card-db-select"
-                                                style="flex: 1; min-width: 0; overflow: hidden;"></select>
-                                            <select id="card-lv-2" class="card-lv-select"
-                                                style="flex-shrink: 0; width: 90px;">
-                                                <option value="1">等級 1</option>
-                                                <option value="2">等級 2</option>
-                                                <option value="3">等級 3</option>
-                                                <option value="4">等級 4</option>
-                                                <option value="5" selected>等級 5</option>
-                                            </select>
-                                        </div>
-                                        <div style="display: flex; gap: 10px; align-items: center;">
-                                            <span
-                                                style="font-size:1rem; width: 55px; flex-shrink: 0; white-space: nowrap;">插槽
-                                                3</span>
-                                            <select id="card-slot-3" class="card-db-select"
-                                                style="flex: 1; min-width: 0; overflow: hidden;"></select>
-                                            <select id="card-lv-3" class="card-lv-select"
-                                                style="flex-shrink: 0; width: 90px;">
-                                                <option value="1">等級 1</option>
-                                                <option value="2">等級 2</option>
-                                                <option value="3">等級 3</option>
-                                                <option value="4">等級 4</option>
-                                                <option value="5" selected>等級 5</option>
-                                            </select>
-                                        </div>
-                                        <div style="display: flex; gap: 10px; align-items: center;">
-                                            <span
-                                                style="font-size:1rem; width: 55px; flex-shrink: 0; white-space: nowrap;">插槽
-                                                4</span>
-                                            <select id="card-slot-4" class="card-db-select"
-                                                style="flex: 1; min-width: 0; overflow: hidden;"></select>
-                                            <select id="card-lv-4" class="card-lv-select"
-                                                style="flex-shrink: 0; width: 90px;">
-                                                <option value="1">等級 1</option>
-                                                <option value="2">等級 2</option>
-                                                <option value="3">等級 3</option>
-                                                <option value="4">等級 4</option>
-                                                <option value="5" selected>等級 5</option>
-                                            </select>
-                                        </div>
-                                        <div style="display: flex; gap: 10px; align-items: center;">
-                                            <span
-                                                style="font-size:1rem; width: 55px; flex-shrink: 0; white-space: nowrap;">插槽
-                                                5</span>
-                                            <select id="card-slot-5" class="card-db-select"
-                                                style="flex: 1; min-width: 0; overflow: hidden;"></select>
-                                            <select id="card-lv-5" class="card-lv-select"
-                                                style="flex-shrink: 0; width: 90px;">
-                                                <option value="1">等級 1</option>
-                                                <option value="2">等級 2</option>
-                                                <option value="3">等級 3</option>
-                                                <option value="4">等級 4</option>
-                                                <option value="5" selected>等級 5</option>
-                                            </select>
-                                        </div>
+                                    <div class="card-slots-list" id="card-slots-container">
+                                        <!-- Dynamically generated by app.js -->
                                     </div>
                                 </div>
 
@@ -400,176 +304,17 @@
                         </form>
 
                         <!-- Skill Level Config Grid -->
-                        <form id="skills-form" onsubmit="return false;"
-                            style="margin-bottom: 35px; border-top: 1px solid var(--border-glass); padding-top: 25px;">
+                        <form id="skills-form" onsubmit="return false;" class="form-section-top">
                             <h3 class="form-section-title">角色技能等級技能 (0 代表未學習)</h3>
-                            <div
-                                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
-                                <div class="filter-group">
-                                    <label for="斬擊">斬擊</label>
-                                    <input type="number" id="斬擊" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="火球術">火球術</label>
-                                    <input type="number" id="火球術" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="暗影突襲">暗影突襲</label>
-                                    <input type="number" id="暗影突襲" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="緊急治療">緊急治療</label>
-                                    <input type="number" id="緊急治療" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="狂戰">狂戰</label>
-                                    <input type="number" id="狂戰" min="0" value="20">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="閃避">閃避</label>
-                                    <input type="number" id="閃避" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="烈火箭">烈火箭</label>
-                                    <input type="number" id="烈火箭" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="石破">石破</label>
-                                    <input type="number" id="石破" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="詛咒打擊">詛咒打擊</label>
-                                    <input type="number" id="詛咒打擊" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="毒刃">毒刃</label>
-                                    <input type="number" id="毒刃" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="烈焰劍">烈焰劍</label>
-                                    <input type="number" id="烈焰劍" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="靈性冥視">靈性冥視</label>
-                                    <input type="number" id="靈性冥視" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="狂雷擊">狂雷擊</label>
-                                    <input type="number" id="狂雷擊" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="元素匯聚">元素匯聚</label>
-                                    <input type="number" id="元素匯聚" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="酸液噴射">酸液噴射</label>
-                                    <input type="number" id="酸液噴射" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="聖光之杖">聖光之杖</label>
-                                    <input type="number" id="聖光之杖" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="終極一擊">終極一擊</label>
-                                    <input type="number" id="終極一擊" min="0" value="70">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="神聖護盾">神聖護盾</label>
-                                    <input type="number" id="神聖護盾" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="大治療術">大治療術</label>
-                                    <input type="number" id="大治療術" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="曙光">曙光</label>
-                                    <input type="number" id="曙光" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="潮汐一斬">潮汐一斬</label>
-                                    <input type="number" id="潮汐一斬" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="侵蝕之觸">侵蝕之觸</label>
-                                    <input type="number" id="侵蝕之觸" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="德魯伊風拳">德魯伊風拳</label>
-                                    <input type="number" id="德魯伊風拳" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="聖輝斬">聖輝斬</label>
-                                    <input type="number" id="聖輝斬" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="元素匯聚．強">元素匯聚．強</label>
-                                    <input type="number" id="元素匯聚．強" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="絕對審判">絕對審判</label>
-                                    <input type="number" id="絕對審判" min="0" value="70">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="疾雷脈衝">疾雷脈衝</label>
-                                    <input type="number" id="疾雷脈衝" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="永恆之泉">永恆之泉</label>
-                                    <input type="number" id="永恆之泉" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="會心">會心</label>
-                                    <input type="number" id="會心" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="暗噬龍咒">暗噬龍咒</label>
-                                    <input type="number" id="暗噬龍咒" min="0" value="60">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="星火滅世陣">星火滅世陣</label>
-                                    <input type="number" id="星火滅世陣" min="0" value="60">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="虛空侵蝕">虛空侵蝕</label>
-                                    <input type="number" id="虛空侵蝕" min="0" value="70">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="星碎滅劍">星碎滅劍</label>
-                                    <input type="number" id="星碎滅劍" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="不滅意志">不滅意志</label>
-                                    <input type="number" id="不滅意志" min="0" value="0">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="天雷神轟鳴">天雷神轟鳴</label>
-                                    <input type="number" id="天雷神轟鳴" min="0" value="70">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="厄水侵蝕">厄水侵蝕</label>
-                                    <input type="number" id="厄水侵蝕" min="0" value="50">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="星辰墜落">星辰墜落</label>
-                                    <input type="number" id="星辰墜落" min="0" value="25">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="宙序裁決">宙序裁決</label>
-                                    <input type="number" id="宙序裁決" min="0" value="25">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="星界終焉">星界終焉</label>
-                                    <input type="number" id="星界終焉" min="0" value="0">
-                                </div>
+                            <div class="skills-input-grid" id="skills-inputs-container">
+                                <!-- Dynamically generated by app.js from SFL_SKILLS_DB -->
                             </div>
                         </form>
-
                         <!-- Loadout operations (.sfl parsing) -->
-                        <div
-                            style="border-top: 1px solid var(--border-glass); padding-top: 25px; display: flex; flex-direction: column; gap: 20px;">
+                        <div class="loadout-section">
                             <h3 class="form-section-title" style="color: var(--primary);">載入與匯出遊戲備份 (.sfl)</h3>
 
-                            <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
+                            <div class="import-file-row">
                                 <div class="filter-group" style="min-width: 250px;">
                                     <span
                                         style="color: var(--text-dim); font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: block;">1.
@@ -585,13 +330,10 @@
                                     </label>
                                     <input type="file" id="import-sfl-input" accept=".sfl" style="display: none;">
                                 </div>
-                                <div id="sfl-filename"
-                                    style="font-size: 0.9rem; color: #7eeff3; font-weight: 600; margin-top: 18px;">
-                                </div>
+                                <div id="sfl-filename"></div>
                             </div>
 
-                            <div
-                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                            <div class="slot-select-grid">
                                 <div class="filter-group">
                                     <label for="stat-slot-select">2. 能力點數分頁 (Stat)</label>
                                     <select id="stat-slot-select" disabled>
@@ -612,7 +354,7 @@
                                 </div>
                             </div>
 
-                            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px;">
+                            <div class="action-btn-row">
                                 <button class="btn primary" id="import-sfl-btn" disabled>導入選擇配置</button>
                                 <button class="btn btn-outline" id="export-sfl-btn" disabled>將當前設定寫回並匯出新的 .sfl
                                     檔案</button>
@@ -673,6 +415,9 @@
                         <h2>SFL 技能升級效益計算</h2>
                         <p>輸入目標屬性，簡易計算所有技能性價比最高的效益排名。</p>
                     </div>
+                    <div class="push-right">
+                        <button class="btn primary" id="skills-save-btn">保存設定</button>
+                    </div>
                 </div>
 
                 <div class="glass-panel">
@@ -718,27 +463,22 @@
                     </div>
 
                     <!-- Under dropdown status message, in a single row with element control and Tinis (Aligned Left) -->
-                    <div
-                        style="display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 35px; padding: 12px 20px; margin-bottom: 25px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1);">
-                        <div class="bonus-text" id="genesis-bonus-hint"
-                            style="text-align: left; color: var(--primary); font-weight: bold; margin: 0; min-width: 220px;">
+                    <div class="skills-bonus-row">
+                        <div class="bonus-text" id="genesis-bonus-hint">
                             創世增幅：屬性克制傷害 +0%
                         </div>
-                        <div class="filter-group"
-                            style="margin: 0; flex-direction: row; align-items: center; gap: 8px;">
-                            <label for="genesis-control" style="margin: 0; white-space: nowrap;">創世命路：元素掌控</label>
-                            <select id="genesis-control"
-                                style="width: auto; padding: 4px 10px; height: 34px; margin: 0;">
+                        <div class="filter-group filter-group-inline">
+                            <label for="genesis-control">創世命路：元素掌控</label>
+                            <select id="genesis-control" class="select-inline">
                                 <option value="none">無 (0%)</option>
                                 <option value="1">I (+25%)</option>
                                 <option value="2">II (+50%)</option>
                             </select>
                         </div>
-                        <div class="filter-group"
-                            style="margin: 0; flex-direction: row; align-items: center; gap: 8px;">
-                            <label for="tinis-toggle" style="margin: 0; cursor: pointer; white-space: nowrap;">提妮絲
+                        <div class="filter-group filter-group-inline">
+                            <label for="tinis-toggle">提妮絲
                                 夥伴</label>
-                            <label class="switch" style="margin: 0;">
+                            <label class="switch">
                                 <input type="checkbox" id="tinis-toggle">
                                 <span class="slider"></span>
                             </label>

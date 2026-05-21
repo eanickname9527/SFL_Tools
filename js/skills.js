@@ -11,13 +11,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const genesisControl = document.getElementById('genesis-control');
     const genesisHint = document.getElementById('genesis-bonus-hint');
     const skillListContainer = document.getElementById('skill-upgrade-ranks');
+    const saveBtn = document.getElementById('skills-save-btn');
+
+    const getStorageKey = (key) => {
+        const pathPrefix = window.location.pathname.replace(/\/[^\/]*$/, '/');
+        return `sfl_${pathPrefix}_skills_${key}`;
+    };
+
+    // Load saved settings from localStorage
+    function loadSettings() {
+        const saved = localStorage.getItem(getStorageKey('settings'));
+        if (!saved) return;
+        try {
+            const s = JSON.parse(saved);
+            if (enemyAttr1Select && s.eAttr1 !== undefined) enemyAttr1Select.value = s.eAttr1;
+            if (enemyAttr2Select && s.eAttr2 !== undefined) enemyAttr2Select.value = s.eAttr2;
+            if (totalActionsInput && s.totalActions !== undefined) totalActionsInput.value = s.totalActions;
+            if (tinisToggle && s.tinis !== undefined) tinisToggle.checked = s.tinis;
+            if (genesisControl && s.genesis !== undefined) genesisControl.value = s.genesis;
+        } catch (e) {
+            // Ignore corrupted data
+        }
+    }
+
+    // Save current settings to localStorage
+    function saveSettings() {
+        const s = {
+            eAttr1: enemyAttr1Select ? enemyAttr1Select.value : '火',
+            eAttr2: enemyAttr2Select ? enemyAttr2Select.value : '無',
+            totalActions: totalActionsInput ? totalActionsInput.value : '10',
+            tinis: tinisToggle ? tinisToggle.checked : false,
+            genesis: genesisControl ? genesisControl.value : 'none'
+        };
+        localStorage.setItem(getStorageKey('settings'), JSON.stringify(s));
+        if (typeof window.showToast === 'function') window.showToast('技能計算設定已保存！');
+    }
 
     // 1. Initialize Options and default setups
     function init() {
+        // Apply defaults first, then overwrite with saved settings
         if (enemyAttr1Select && enemyAttr2Select) {
             enemyAttr1Select.value = '火';
             enemyAttr2Select.value = '無';
         }
+        loadSettings();
 
         // Attach listeners
         [enemyAttr1Select, enemyAttr2Select, tinisToggle, genesisControl].forEach(el => {
@@ -28,6 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (totalActionsInput) {
             totalActionsInput.addEventListener('input', calculateUpgradeEfficiency);
+        }
+
+        if (saveBtn) {
+            saveBtn.addEventListener('click', saveSettings);
         }
 
         // Initial Calculation
