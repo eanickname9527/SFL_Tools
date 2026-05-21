@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewId === 'skills' && typeof window.calculateSkillUpgrades === 'function') {
             window.calculateSkillUpgrades();
         }
+        // Note: window.calculateSkillUpgrades is exposed from skills.js
     }
 
     // Bind nav sidebar items click

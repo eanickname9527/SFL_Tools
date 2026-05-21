@@ -221,4 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Run setup
     init();
+
+    // Expose globally for app.js tab-switch trigger
+    window.calculateSkillUpgrades = calculateUpgradeEfficiency;
 });

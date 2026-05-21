@@ -73,9 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Helper to get card color
-    function getTitleColor(cardName, chapter) {
-        return '#7eeff3ff';
-    }
+    const TITLE_COLOR = '#7eeff3ff';
 
     // Helper to get rarity tag color
     function getRarityColor(quality) {
@@ -158,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const type = typeMatch ? typeMatch[1] : '其他';
             const displayName = typeMatch ? typeMatch[2].trim() : card.name;
 
-            const titleStyle = `style="color: ${getTitleColor(card.name, chapter)};"`;
+            const titleStyle = `style="color: ${TITLE_COLOR};"`;
 
             cardEl.innerHTML = `
                 <div class="card-header">

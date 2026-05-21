@@ -105,16 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     return s.multiplier + (lv - 1) * (s.multiplierperlvl || 0);
                 };
 
-                const waitRound = 0; // 此戰鬥系統不採用，強制保持為 0
-
                 if (s.id === 'normal_attack' || s.name === '普攻') {
-                    attack['普攻'] = { attr: '無', waitRound: 0, cd: 0, multi: 1, cri: false, type: 'atk' };
+                    attack['普攻'] = { attr: '無', cd: 0, multi: 1, cri: false, type: 'atk' };
                 }
 
                 if (['atk', 'debuff_atk', 'dot_atk', 'damage_shield', 'control', 'pursuit'].includes(s.type)) {
                     attack[s.name] = {
                         attr: (s.id === 'elemental_convergence' || s.id === 'elemental_convergence_2') ? '特殊' : elNames,
-                        waitRound: waitRound,
                         cd: s.cd || 0,
                         multi: multiFn,
                         type: s.type,
@@ -122,17 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         raw: s
                     };
                     if (s.type === 'debuff_atk' && s.debuff) {
-                        attack[s.name].deffnum = s.deffnum || 1; // Keep for safety if any fallback uses it
                         attack[s.name].debuff = s.debuff;
                     }
                     if (s.type === 'dot_atk' && s.dot) {
-                        attack[s.name].dotnum = s.dotnum || 1; // Keep for safety if any fallback uses it
                         attack[s.name].dot = s.dot;
                     }
                 } else if (['buff', 'invincible', 'support'].includes(s.type)) {
                     buff[s.name] = {
                         attr: s.type === 'invincible' ? '抵禦' : (s.type === 'support' ? '輔助' : '增益'),
-                        waitRound: waitRound,
                         cd: s.cd || 0,
                         effect: s.effectType === 'accuracy' ? 'hit_rate' : (s.effectType === 'evade' ? 'evasion' : (s.effectType === 'atk_speed' ? 'speed' : (s.effectType || s.type))),
                         multi: multiFn,
@@ -144,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (s.type === 'heal') {
                     heal[s.name] = {
                         attr: '治療',
-                        waitRound: waitRound,
                         cd: s.cd || 0,
                         multi: multiFn
                     };
@@ -154,14 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Guarantee 普攻 exists just in case
         if (!attack['普攻']) {
-            attack['普攻'] = { attr: '無', waitRound: 0, cd: 0, multi: 1, cri: false, type: 'atk' };
+            attack['普攻'] = { attr: '無', cd: 0, multi: 1, cri: false, type: 'atk' };
         }
 
         window.ATTACK_SKILLS_DATA = attack;
         window.BUFF_SKILLS_DATA = buff;
         window.HEAL_SKILLS_DATA = heal;
-        window.DOT_SKILLS_DATA = {};
-        window.DEBUFF_SKILLS_DATA = {};
     }
 
     compileSkillsData();
@@ -169,6 +160,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------------------
     // 3. CARDS SLOTS WORKBENCH AND DUPLICATE EXCLUSION SYSTEM
     // -------------------------------------------------------------------------
+    // Card bonus key mapping: data uses evade/accuracy/penetrate/other_bonus;
+    // runtime stat object uses evasion/hit_rate/shield_pen/bonus_dmg.
+    function applyCardBonusToStats(stats, bonus) {
+        if (bonus.hp) stats.hp += bonus.hp;
+        if (bonus.attack) stats.attack += bonus.attack;
+        if (bonus.luck) stats.luck += bonus.luck;
+        if (bonus.atk_speed) stats.atk_speed += bonus.atk_speed;
+        if (bonus.shield) stats.shield += bonus.shield;
+        if (bonus.evade) stats.evasion += (bonus.evade * 100);
+        if (bonus.accuracy) stats.hit_rate += (bonus.accuracy * 100);
+        if (bonus.penetrate) stats.shield_pen += bonus.penetrate;
+        if (bonus.other_bonus) stats.bonus_dmg += (bonus.other_bonus * 100);
+    }
+    window.applyCardBonusToStats = applyCardBonusToStats;
+
     function populateCardSelects() {
         if (!window.SFL_CARDS_DB) return;
 
@@ -250,15 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cardData && cardData.value && cardData.value[level]) {
                     const bonus = cardData.value[level];
 
-                    if (bonus.hp) calculatedStats.hp += bonus.hp;
-                    if (bonus.attack) calculatedStats.attack += bonus.attack;
-                    if (bonus.luck) calculatedStats.luck += bonus.luck;
-                    if (bonus.atk_speed) calculatedStats.atk_speed += bonus.atk_speed;
-                    if (bonus.shield) calculatedStats.shield += bonus.shield;
-                    if (bonus.evade) calculatedStats.evasion += (bonus.evade * 100);
-                    if (bonus.accuracy) calculatedStats.hit_rate += (bonus.accuracy * 100);
-                    if (bonus.penetrate) calculatedStats.shield_pen += bonus.penetrate;
-                    if (bonus.other_bonus) calculatedStats.bonus_dmg += (bonus.other_bonus * 100);
+                    applyCardBonusToStats(calculatedStats, bonus);
                 }
             }
         }
@@ -593,14 +591,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------------------
     // 6. COMBAT SIMULATION CORE ENGINE
     // -------------------------------------------------------------------------
+    // Normalize raw data effectType names to runtime stat names used in combat
+    const normalizeAttr = a => a === 'atk_speed' ? 'speed' : a === 'evade' ? 'evasion' : a;
+
     const getDebuffMulti = (target, attr) => {
         if (!target.activeDebuffs) return 1.0;
         let multi = 1.0;
         target.activeDebuffs.forEach(d => {
-            let dAttr = d.attr;
-            if (dAttr === 'atk_speed') dAttr = 'speed';
-            if (dAttr === 'evade') dAttr = 'evasion';
-            if (dAttr === attr) multi *= (1 - d.effect);
+            if (d.attr === attr) multi *= (1 - d.effect);
         });
         return multi;
     };
@@ -609,10 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!target.activeBuffs) return 1.0;
         let multi = 1.0;
         target.activeBuffs.forEach(b => {
-            let bEffect = b.effect;
-            if (bEffect === 'atk_speed') bEffect = 'speed';
-            if (bEffect === 'evade') bEffect = 'evasion';
-            if (!b.pending && bEffect === attr) multi *= b.value;
+            if (!b.pending && b.effect === attr) multi *= b.value;
         });
         return multi;
     };
@@ -943,7 +938,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     e.activeDebuffs.push({
                                         name: sData.debuff.name,
                                         effect: 1 - (sData.debuff.multiplier || 1.0),
-                                        attr: sData.debuff.effectType || 'attack',
+                                        attr: normalizeAttr(sData.debuff.effectType || 'attack'),
                                         dur: sData.debuff.round || 2
                                     });
                                     if (verbose) battleLog(`[敵方] 受到 ${sData.debuff.name} 侵擾，各項能力被扣減`, 'fail');
@@ -1041,7 +1036,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             } else {
                                 // 等差傷害最大化或正常計算
                                 const eLvMultiForP = eAttrChars.level_diff_max ? 1.5 : (diff >= 7 ? 1.5 : (diff <= -7 ? 0.5 : 1.0 + (diff * (0.5 / 7))));
-                                const currentPMitigation = hasBuff(tp, 'invincible') ? 1.0 : tp.mitigation;
                                 const finalPMitigation = hasBuff(tp, 'invincible') ? 1.0 : (eAttrChars.ignore_shield ? 0 : tp.mitigation);
                                 damage = eAtk * skillMulti * eLvMultiForP * attrMulti * (1 - finalPMitigation);
                             }
@@ -1095,7 +1089,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 tp.activeDebuffs.push({
                                     name: skill.debuff.name,
                                     effect: 1 - (skill.debuff.value || skill.debuff.multiplier || 1),
-                                    attr: skill.debuff.effect || skill.debuff.effectType,
+                                    attr: normalizeAttr(skill.debuff.effect || skill.debuff.effectType),
                                     dur: skill.debuff.dur || skill.debuff.round
                                 });
                             }
