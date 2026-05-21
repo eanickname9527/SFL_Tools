@@ -883,6 +883,7 @@ select option {
 .card[data-chapter="world_boss"]::before {
     background: var(--color-world_boss);
 }
+
 .card[data-chapter="world_boss"]:hover {
     border-color: rgba(0, 236, 0, 0.4);
     box-shadow: 0 8px 25px rgba(0, 236, 0, 0.15);
@@ -891,6 +892,7 @@ select option {
 .card[data-chapter="event"]::before {
     background: var(--color-event);
 }
+
 .card[data-chapter="event"]:hover {
     border-color: rgba(240, 0, 120, 0.4);
     box-shadow: 0 8px 25px rgba(240, 0, 120, 0.15);
@@ -899,6 +901,7 @@ select option {
 .card[data-chapter="ch1"]::before {
     background: var(--color-ch1);
 }
+
 .card[data-chapter="ch1"]:hover {
     border-color: rgba(249, 249, 0, 0.4);
     box-shadow: 0 8px 25px rgba(249, 249, 0, 0.15);
@@ -907,6 +910,7 @@ select option {
 .card[data-chapter="ch2"]::before {
     background: var(--color-ch2);
 }
+
 .card[data-chapter="ch2"]:hover {
     border-color: rgba(255, 0, 0, 0.4);
     box-shadow: 0 8px 25px rgba(255, 0, 0, 0.15);
@@ -915,6 +919,7 @@ select option {
 .card[data-chapter="ch3"]::before {
     background: var(--color-ch3);
 }
+
 .card[data-chapter="ch3"]:hover {
     border-color: rgba(210, 0, 210, 0.4);
     box-shadow: 0 8px 25px rgba(210, 0, 210, 0.15);
@@ -1102,7 +1107,7 @@ input:checked+.slider:before {
     border-radius: 16px;
     display: flex;
     flex-direction: column;
-    height: 480px;
+    height: 780px;
     overflow: hidden;
 }
 
