@@ -14,9 +14,9 @@ const ATTRIBUTE_DATA = {
 // 英文 ID 到中文屬性名稱映射表
 const ELEMENT_MAP = {
     'pyro': '火', 'hydro': '水', 'nature': '自然', 'electro': '雷',
-    'lumen': '光', 'light': '光', 'dark': '暗',
-    'cosmos': '宇', 'universe': '宇',
-    'chronos': '宙', 'spacetime': '宙',
+    'light': '光', 'dark': '暗',
+    'universe': '宇',
+    'spacetime': '宙',
     'origin': '源', 'law': '律', 'none': '無', 'all': '全'
 };
 
