@@ -66,8 +66,8 @@ const ATTRIBUTE_MULTIPLIERS = {
 const ATTRIBUTE_DEFENDER_FALLBACKS = {
     '宇': 0.50, // 其餘打 宇/宙 (-50% 傷害)
     '宙': 0.50,
-    '源': 0.25, // 其餘打 源/律 (-75% 傷害)
-    '律': 0.25
+    '源': 0.75, // 其餘打 源 (-25% 傷害)
+    '律': 0.25  // 其餘打 律 (-75% 傷害)
 };
 
 // 3. 屬性攻擊/防禦特性定義表 (Attack/Defense Characteristics)
