@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const genesisHint = document.getElementById('genesis-bonus-hint');
     const skillListContainer = document.getElementById('skill-upgrade-ranks');
     const saveBtn = document.getElementById('skills-save-btn');
+    const detailsToggle = document.getElementById('details-toggle');
 
     const getStorageKey = (key) => {
         const pathPrefix = window.location.pathname.replace(/\/[^\/]*$/, '/');
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (totalActionsInput && s.totalActions !== undefined) totalActionsInput.value = s.totalActions;
             if (tinisToggle && s.tinis !== undefined) tinisToggle.checked = s.tinis;
             if (genesisControl && s.genesis !== undefined) genesisControl.value = s.genesis;
+            if (detailsToggle && s.details !== undefined) detailsToggle.checked = s.details;
         } catch (e) {
             // Ignore corrupted data
         }
@@ -41,7 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
             eAttr2: enemyAttr2Select ? enemyAttr2Select.value : '無',
             totalActions: totalActionsInput ? totalActionsInput.value : '10',
             tinis: tinisToggle ? tinisToggle.checked : false,
-            genesis: genesisControl ? genesisControl.value : 'none'
+            genesis: genesisControl ? genesisControl.value : 'none',
+            details: detailsToggle ? detailsToggle.checked : true
         };
         localStorage.setItem(getStorageKey('settings'), JSON.stringify(s));
         if (typeof window.showToast === 'function') window.showToast('技能計算設定已保存！');
@@ -54,10 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
             enemyAttr1Select.value = '火';
             enemyAttr2Select.value = '無';
         }
+        if (detailsToggle) {
+            detailsToggle.checked = true;
+        }
         loadSettings();
 
         // Attach listeners
-        [enemyAttr1Select, enemyAttr2Select, tinisToggle, genesisControl].forEach(el => {
+        [enemyAttr1Select, enemyAttr2Select, tinisToggle, genesisControl, detailsToggle].forEach(el => {
             if (el) {
                 el.addEventListener('change', calculateUpgradeEfficiency);
             }
@@ -216,48 +222,81 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        skillListContainer.innerHTML = results.map((skill, index) => {
-            const attrStyle = getElementStyle(skill.attr);
+        const showDetails = detailsToggle ? detailsToggle.checked : true;
 
-            // Apply HSL colors for higher ranks to make it feel extremely premium
-            let borderStyle = 'border: 1px solid var(--border-glass);';
-            let rankBadgeClass = 'rank-badge-normal';
-            if (index === 0) {
-                borderStyle = 'border: 1px solid rgba(255, 210, 63, 0.4); background: rgba(255, 210, 63, 0.08);';
-                rankBadgeClass = 'rank-badge-gold';
-            } else if (index === 1) {
-                borderStyle = 'border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.08);';
-                rankBadgeClass = 'rank-badge-silver';
-            } else if (index === 2) {
-                borderStyle = 'border: 1px solid rgba(78, 201, 176, 0.4); background: rgba(78, 201, 176, 0.08);';
-                rankBadgeClass = 'rank-badge-bronze';
-            }
+        if (showDetails) {
+            skillListContainer.className = 'skill-grid';
+            skillListContainer.innerHTML = results.map((skill, index) => {
+                const attrStyle = getElementStyle(skill.attr);
 
-            return `
-                <div class="skill-card" style="${borderStyle} padding: 16px; border-radius: 12px; backdrop-filter: blur(10px); display: flex; flex-direction: column; gap: 12px; transition: transform 0.2s ease, box-shadow 0.2s ease;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="skill-rank-badge ${rankBadgeClass}">#${index + 1}</span>
+                // Apply HSL colors for higher ranks to make it feel extremely premium
+                let borderStyle = 'border: 1px solid var(--border-glass);';
+                let rankBadgeClass = 'rank-badge-normal';
+                if (index === 0) {
+                    borderStyle = 'border: 1px solid rgba(255, 210, 63, 0.4); background: rgba(255, 210, 63, 0.08);';
+                    rankBadgeClass = 'rank-badge-gold';
+                } else if (index === 1) {
+                    borderStyle = 'border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.08);';
+                    rankBadgeClass = 'rank-badge-silver';
+                } else if (index === 2) {
+                    borderStyle = 'border: 1px solid rgba(78, 201, 176, 0.4); background: rgba(78, 201, 176, 0.08);';
+                    rankBadgeClass = 'rank-badge-bronze';
+                }
+
+                return `
+                    <div class="skill-card" style="${borderStyle} padding: 16px; border-radius: 12px; backdrop-filter: blur(10px); display: flex; flex-direction: column; gap: 12px; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="skill-rank-badge ${rankBadgeClass}">#${index + 1}</span>
+                            <span style="font-size: 0.8rem; padding: 2px 8px; border-radius: 99px; background: ${attrStyle.bg}; color: ${attrStyle.color}; border: 1px solid ${attrStyle.color}33; font-weight: 600;">
+                                ${skill.attr} 屬性
+                            </span>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 1.1rem; margin: 0; font-weight: bold; color: var(--text-main);">${skill.name}</h4>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; border-top: 1px solid var(--border-glass); padding-top: 10px; margin-top: 5px;">
+                            <span style="font-size: 0.8rem; color: #7eeff3;">CD冷卻: <b style="color: var(--text-main);">${skill.cd} 回合</b></span>
+                            <span style="font-size: 0.8rem; color: #7eeff3;">等待回合: <b style="color: var(--text-main);">${skill.ub} 回合</b></span>
+                            <span style="font-size: 0.8rem; color: #7eeff3;">可用次數: <b style="color: var(--primary);">${skill.numUses} 次</b></span>
+                            <span style="font-size: 0.8rem; color: #7eeff3;">克制倍率: <b style="color: var(--accent);">${skill.multiplier.toFixed(2)}x</b></span>
+                            <span style="font-size: 0.8rem; color: #7eeff3; grid-column: span 2;">每級成長: <b style="color: var(--text-main);">${skill.growth.toFixed(2)}</b></span>
+                        </div>
+                        <div style="border-top: 1px solid var(--border-glass); padding-top: 12px; margin-top: 5px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.75rem; color: #7eeff3;">升級效益分值：</span>
+                            <span style="font-size: 1.25rem; font-weight: bold; color: var(--primary);">${skill.efficiency.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            skillListContainer.className = 'skill-grid-compact';
+            skillListContainer.innerHTML = results.map((skill, index) => {
+                const attrStyle = getElementStyle(skill.attr);
+
+                let borderStyle = 'border: 1px solid var(--border-glass);';
+                let rankBadgeClass = 'rank-badge-normal';
+                if (index === 0) {
+                    borderStyle = 'border: 1px solid rgba(255, 210, 63, 0.4); background: rgba(255, 210, 63, 0.08);';
+                    rankBadgeClass = 'rank-badge-gold';
+                } else if (index === 1) {
+                    borderStyle = 'border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.08);';
+                    rankBadgeClass = 'rank-badge-silver';
+                } else if (index === 2) {
+                    borderStyle = 'border: 1px solid rgba(78, 201, 176, 0.4); background: rgba(78, 201, 176, 0.08);';
+                    rankBadgeClass = 'rank-badge-bronze';
+                }
+
+                return `
+                    <div class="skill-card-compact" style="${borderStyle}">
+                        <span class="skill-rank-badge ${rankBadgeClass}" style="min-width: 42px; text-align: center;">#${index + 1}</span>
+                        <h4 style="font-size: 1.05rem; margin: 0; font-weight: bold; color: var(--text-main);">${skill.name}</h4>
                         <span style="font-size: 0.8rem; padding: 2px 8px; border-radius: 99px; background: ${attrStyle.bg}; color: ${attrStyle.color}; border: 1px solid ${attrStyle.color}33; font-weight: 600;">
                             ${skill.attr} 屬性
                         </span>
                     </div>
-                    <div>
-                        <h4 style="font-size: 1.1rem; margin: 0; font-weight: bold; color: var(--text-main);">${skill.name}</h4>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; border-top: 1px solid var(--border-glass); padding-top: 10px; margin-top: 5px;">
-                        <span style="font-size: 0.8rem; color: #7eeff3;">CD冷卻: <b style="color: var(--text-main);">${skill.cd} 回合</b></span>
-                        <span style="font-size: 0.8rem; color: #7eeff3;">等待回合: <b style="color: var(--text-main);">${skill.ub} 回合</b></span>
-                        <span style="font-size: 0.8rem; color: #7eeff3;">可用次數: <b style="color: var(--primary);">${skill.numUses} 次</b></span>
-                        <span style="font-size: 0.8rem; color: #7eeff3;">克制倍率: <b style="color: var(--accent);">${skill.multiplier.toFixed(2)}x</b></span>
-                        <span style="font-size: 0.8rem; color: #7eeff3; grid-column: span 2;">每級成長: <b style="color: var(--text-main);">${skill.growth.toFixed(2)}</b></span>
-                    </div>
-                    <div style="border-top: 1px solid var(--border-glass); padding-top: 12px; margin-top: 5px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.75rem; color: #7eeff3;">升級效益分值：</span>
-                        <span style="font-size: 1.25rem; font-weight: bold; color: var(--primary);">${skill.efficiency.toFixed(2)}</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
+                `;
+            }).join('');
+        }
     }
 
     // Run setup
