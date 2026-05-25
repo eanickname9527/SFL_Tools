@@ -2,6 +2,69 @@
  * SFL Tools Integrated Portal - Main Controller (app.js)
  */
 
+// 全域自訂 Modal 對話窗，傳回 Promise
+window.showCustomConfirm = function(title, bodyText, showCancel = true) {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('custom-modal');
+        const titleEl = document.getElementById('modal-title');
+        const bodyEl = document.getElementById('modal-body');
+        const cancelBtn = document.getElementById('modal-cancel-btn');
+        const confirmBtn = document.getElementById('modal-confirm-btn');
+
+        if (!overlay || !titleEl || !bodyEl || !cancelBtn || !confirmBtn) {
+            // 退路：如果DOM不存在，回退到原生confirm/alert
+            if (showCancel) {
+                resolve(confirm(bodyText));
+            } else {
+                alert(bodyText);
+                resolve(true);
+            }
+            return;
+        }
+
+        titleEl.textContent = title;
+        bodyEl.textContent = bodyText;
+
+        // 依據引數顯示或隱藏取消按鈕
+        if (showCancel) {
+            cancelBtn.style.display = 'inline-block';
+        } else {
+            cancelBtn.style.display = 'none';
+        }
+
+        overlay.style.display = 'flex';
+        overlay.offsetHeight; // 強制重繪
+        overlay.classList.add('active');
+
+        function cleanup() {
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 250);
+            cancelBtn.removeEventListener('click', onCancel);
+            confirmBtn.removeEventListener('click', onConfirm);
+        }
+
+        function onCancel() {
+            cleanup();
+            resolve(false);
+        }
+
+        function onConfirm() {
+            cleanup();
+            resolve(true);
+        }
+
+        cancelBtn.addEventListener('click', onCancel);
+        confirmBtn.addEventListener('click', onConfirm);
+    });
+};
+
+// 全域自訂 Modal 警告對話窗，傳回 Promise
+window.showCustomAlert = function(title, bodyText) {
+    return window.showCustomConfirm(title, bodyText, false);
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // Helper to prevent Same-Origin localStorage pollution on shared domains (like GitHub Pages)
     const getStorageKey = (key) => {

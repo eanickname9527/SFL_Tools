@@ -415,8 +415,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadPlayerStats(playerNum);
     }
 
-    function resetPlayerStats() {
-        if (confirm(`確定要將 玩家 ${currentPlayer} 的能力值恢復到預設狀態嗎？`)) {
+    async function resetPlayerStats() {
+        if (await window.showCustomConfirm('⚙️ 恢復預設配置', `確定要將 玩家 ${currentPlayer} 的能力值恢復到預設狀態嗎？`)) {
             const def = currentPlayer === 1 ? DEFAULT_STATS : (currentPlayer === 2 ? DEFAULT_P2 : DEFAULT_P3);
             localStorage.setItem(getStorageKey(currentPlayer), JSON.stringify(def));
             loadPlayerStats(currentPlayer);

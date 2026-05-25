@@ -56,6 +56,20 @@
             window.SFL_CARDS_DB.forEach(c => cardDatabase[c.id] = c.name);
         }
 
+        window.addEventListener('sfl-data-loaded', (e) => {
+            if (e.detail.source === 'loadout') return;
+            decodedData = e.detail.data;
+            if (filenameDisplay && e.detail.filename) {
+                filenameDisplay.textContent = `📄 ${e.detail.filename}`;
+            }
+            populateDropdowns();
+            if (statSelect) statSelect.disabled = false;
+            if (skillSelect) skillSelect.disabled = false;
+            if (cardSelect) cardSelect.disabled = false;
+            if (importBtn) importBtn.disabled = false;
+            if (exportBtn) exportBtn.disabled = false;
+        });
+
         console.log('Loadout database sync completed:', {
             skills: Object.keys(skillDatabase).length,
             cards: Object.keys(cardDatabase).length
@@ -123,6 +137,13 @@
         try {
             const text = await file.text();
             decodedData = decodeSFLData(text);
+
+            // Sync globally to enable cross-module synchronization
+            window.sflDecodedData = decodedData;
+            window.sflFilename = file.name;
+            window.dispatchEvent(new CustomEvent('sfl-data-loaded', {
+                detail: { data: decodedData, filename: file.name, source: 'loadout' }
+            }));
 
             populateDropdowns();
 
@@ -302,7 +323,7 @@
     /**
      * Export current values back to a .sfl backup file
      */
-    function exportConfiguration() {
+    async function exportConfiguration() {
         if (!decodedData) return;
 
         const statId = statSelect?.value;
@@ -310,11 +331,11 @@
         const cardId = cardSelect?.value;
 
         if (!statId && !skillId && !cardId) {
-            alert('請至少選擇一個分頁槽位作為寫回目標。');
+            await window.showCustomAlert('⚠️ 匯出槽位提示', '請至少選擇一個分頁槽位作為寫回目標。');
             return;
         }
 
-        const isConfirmed = confirm('您確定要將目前的「加點屬性/卡片配置」與「技能等級」覆蓋回備份檔中，並匯出下載新檔案嗎？');
+        const isConfirmed = await window.showCustomConfirm('💾 覆蓋備份檔並匯出', '您確定要將目前的「加點屬性/卡片配置」與「技能等級」覆蓋回備份檔中，並匯出下載新檔案嗎？');
         if (!isConfirmed) return;
 
         const now = Date.now();
@@ -401,7 +422,7 @@
             window.showToast('遊戲備份設定匯出成功！');
         } catch (e) {
             console.error('Export configuration error:', e);
-            alert('匯出失敗：' + e.message);
+            await window.showCustomAlert('❌ 匯出失敗提示', '匯出失敗：' + e.message);
         }
     }
 

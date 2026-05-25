@@ -1405,3 +1405,185 @@ input:checked+.slider:before {
     box-shadow: 0 5px 15px rgba(99, 102, 241, 0.06);
     background: rgba(255, 255, 255, 0.04);
 }
+
+/* ==========================================
+   Custom Glassmorphism modal Styles
+   ========================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 15, 28, 0.7);
+    backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+}
+
+.modal-overlay .modal-content {
+    background: rgba(23, 31, 54, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 30px;
+    width: 90%;
+    max-width: 580px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    transform: scale(0.92);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-sizing: border-box;
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    color: var(--primary);
+    margin: 0;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-glass);
+    padding-bottom: 15px;
+    letter-spacing: 0.5px;
+}
+
+.modal-body {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-main);
+    white-space: pre-wrap;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding-right: 10px;
+    word-break: break-all;
+}
+
+/* Custom Scrollbar for Modal Body */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.2);
+    border-radius: 99px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.4);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    border-top: 1px solid var(--border-glass);
+    padding-top: 20px;
+}
+
+.modal-actions .btn {
+    padding: 10px 24px;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* ==========================================
+   Fast Import SFL Settings Panel Styles
+   ========================================== */
+.skills-bonus-row.sep-top {
+    margin-top: 15px;
+    border-top: 1px solid var(--border-glass);
+    padding-top: 15px;
+}
+
+.filter-group.filter-group-inline.no-left-margin {
+    margin-left: 0;
+}
+
+.fast-import-toggle-label {
+    margin-bottom: 0;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.fast-import-panel {
+    display: none;
+    margin-top: 20px;
+    padding: 25px;
+    border: 1px dashed rgba(99, 102, 241, 0.4);
+    border-radius: 16px;
+    background: rgba(15, 23, 42, 0.5);
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.05);
+}
+
+.fast-import-desc {
+    color: var(--accent) !important;
+    margin: 0;
+}
+
+.controls-row.align-bottom {
+    margin-bottom: 0;
+    gap: 20px;
+    align-items: flex-end;
+}
+
+.filter-group.w-220 {
+    min-width: 220px;
+    margin-bottom: 0;
+}
+
+.filter-group.w-200 {
+    min-width: 200px;
+    margin-bottom: 0;
+}
+
+.filter-group.w-150 {
+    min-width: 150px;
+    margin-bottom: 0;
+}
+
+.custom-file-upload.mt-5 {
+    margin-top: 5px;
+}
+
+.fast-import-filename {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    align-self: center;
+    margin-bottom: 8px;
+}
+
+.select-full {
+    width: 100%;
+}
+
+.btn-padding-large {
+    padding: 10px 24px;
+}
+
+.fast-import-info {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border-glass);
+    padding-top: 10px;
+    margin-top: 5px;
+}

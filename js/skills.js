@@ -186,6 +186,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Rank by efficiency from high to low
         results.sort((a, b) => b.efficiency - a.efficiency);
 
+        // Expose current efficiency ranks globally for the fast-import tool
+        window.currentSkillEfficiencyRanks = results;
+
         renderRanks(results);
     }
 
@@ -301,6 +304,320 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Run setup
     init();
+
+    // === 快速導入 SFL 核心邏輯 ===
+    const fastImportToggle = document.getElementById('fast-import-toggle');
+    const fastImportContainer = document.getElementById('fast-import-container');
+    const fastFileInput = document.getElementById('fast-import-sfl-input');
+    const fastFilenameDisplay = document.getElementById('fast-import-filename');
+    const fastLoadSelect = document.getElementById('fast-import-load-select');
+    const fastSaveSelect = document.getElementById('fast-import-save-select');
+    const fastShipSelect = document.getElementById('fast-ship-level-select');
+    const fastExecuteBtn = document.getElementById('fast-import-execute-btn');
+    const fastImportInfo = document.getElementById('fast-import-info');
+
+    let fastDecodedData = null;
+
+    // 1. 折疊開關控制
+    if (fastImportToggle && fastImportContainer) {
+        fastImportToggle.addEventListener('change', () => {
+            if (fastImportToggle.checked) {
+                fastImportContainer.style.display = 'flex';
+                // 當打開時，若已有全域載入的 SFL 資料，則自動同步
+                if (window.sflDecodedData) {
+                    syncFromGlobalData();
+                }
+            } else {
+                fastImportContainer.style.display = 'none';
+            }
+        });
+    }
+
+    // 2. 監聽全域 SFL 資料載入事件（實現雙向同步）
+    window.addEventListener('sfl-data-loaded', (e) => {
+        if (e.detail.source === 'fast-import') return;
+        fastDecodedData = e.detail.data;
+        if (fastFilenameDisplay && e.detail.filename) {
+            fastFilenameDisplay.textContent = `📄 ${e.detail.filename}`;
+        }
+        populateFastDropdowns();
+        enableFastControls();
+        if (fastImportInfo) {
+            fastImportInfo.textContent = '提示：已自動同步大廳載入的 SFL 資料配置！可以直接設定分頁並執行導入。';
+            fastImportInfo.style.color = 'var(--primary)';
+        }
+    });
+
+    function syncFromGlobalData() {
+        if (window.sflDecodedData) {
+            fastDecodedData = window.sflDecodedData;
+            if (fastFilenameDisplay && window.sflFilename) {
+                fastFilenameDisplay.textContent = `📄 ${window.sflFilename}`;
+            }
+            populateFastDropdowns();
+            enableFastControls();
+        }
+    }
+
+    // 3. 處理點擊載入檔案
+    if (fastFileInput) {
+        fastFileInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (fastFilenameDisplay) fastFilenameDisplay.textContent = `📄 ${file.name}`;
+            if (fastImportInfo) {
+                fastImportInfo.textContent = '提示：載入成功，請選擇分頁以進行點數優化分配。';
+                fastImportInfo.style.color = 'var(--primary)';
+            }
+
+            try {
+                const text = await file.text();
+                fastDecodedData = decodeSFLDataFast(text);
+
+                // 同步給全域與多人副本模組
+                window.sflDecodedData = fastDecodedData;
+                window.sflFilename = file.name;
+                window.dispatchEvent(new CustomEvent('sfl-data-loaded', {
+                    detail: { data: fastDecodedData, filename: file.name, source: 'fast-import' }
+                }));
+
+                populateFastDropdowns();
+                enableFastControls();
+                if (typeof window.showToast === 'function') {
+                    window.showToast('成功載入 .sfl 備份檔案！');
+                }
+            } catch (e) {
+                if (fastImportInfo) {
+                    fastImportInfo.textContent = '⚠️ 載入失敗：' + e.message;
+                    fastImportInfo.style.color = '#ef4444';
+                }
+                if (fastFilenameDisplay) fastFilenameDisplay.textContent = '';
+                console.error(e);
+            }
+        });
+    }
+
+    function populateFastDropdowns() {
+        if (!fastDecodedData) return;
+        fillFastSelect(fastLoadSelect, fastDecodedData.sfl_skill_slot_names, fastDecodedData.sfl_skill_loadouts);
+        fillFastSelect(fastSaveSelect, fastDecodedData.sfl_skill_slot_names, fastDecodedData.sfl_skill_loadouts);
+    }
+
+    function fillFastSelect(select, names, data) {
+        if (!select) return;
+        select.innerHTML = '<option value="">-- 請選擇分頁 --</option>';
+        if (!names) return;
+
+        Object.entries(names).forEach(([id, name]) => {
+            const hasData = data && data[id] !== null && data[id] !== undefined;
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = `${id}. ${name}`;
+            if (!hasData) {
+                opt.style.color = '#555';
+            }
+            select.appendChild(opt);
+        });
+    }
+
+    function enableFastControls() {
+        if (fastLoadSelect) fastLoadSelect.disabled = false;
+        if (fastSaveSelect) fastSaveSelect.disabled = false;
+        if (fastExecuteBtn) fastExecuteBtn.disabled = false;
+    }
+
+    // 4. 解碼與編碼演算法
+    function decodeSFLDataFast(raw) {
+        const str = raw.trim();
+        if (str.startsWith('{')) return JSON.parse(str);
+        if (!str.startsWith('SFL1:')) throw new Error('格式不正確 (遺失 SFL1 標頭)');
+
+        const parts = str.split(':');
+        if (parts.length < 3) throw new Error('格式不正確 (段落不足)');
+
+        const savedChecksum = parseInt(parts[1], 10);
+        const b64 = parts.slice(2).join(':');
+        const jsonStr = decodeURIComponent(escape(atob(b64)));
+
+        let checksum = 0;
+        for (let i = 0; i < jsonStr.length; i += 7) {
+            checksum = (checksum + jsonStr.charCodeAt(i)) % 65521;
+        }
+
+        if (checksum !== savedChecksum) {
+            throw new Error('資料已被篡改，校驗碼比對失敗');
+        }
+
+        return JSON.parse(jsonStr);
+    }
+
+    function encodeExportDataFast(data) {
+        const jsonStr = JSON.stringify(data);
+        const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
+        let checksum = 0;
+        for (let i = 0; i < jsonStr.length; i += 7) {
+            checksum = (checksum + jsonStr.charCodeAt(i)) % 65521;
+        }
+        return 'SFL1:' + checksum + ':' + b64;
+    }
+
+    // 5. 快速導入分配按鈕執行
+    if (fastExecuteBtn) {
+        fastExecuteBtn.addEventListener('click', async () => {
+            if (!fastDecodedData) return;
+
+            const loadSlotId = fastLoadSelect.value;
+            const saveSlotId = fastSaveSelect.value;
+
+            if (!loadSlotId || !saveSlotId) {
+                await window.showCustomAlert('⚠️ 槽位選取提示', '請選擇載入與儲存的分頁槽位。');
+                return;
+            }
+
+            const sourceSlot = fastDecodedData.sfl_skill_loadouts[loadSlotId];
+            if (!sourceSlot) {
+                await window.showCustomAlert('⚠️ 資料遺失提示', '載入分頁沒有可讀取的技能數據。');
+                return;
+            }
+
+            // 1. 篩選所有攻擊技能 ('atk', 'debuff_atk', 'dot_atk')
+            if (!window.SFL_SKILLS_DB) {
+                await window.showCustomAlert('⚠️ 資料庫遺失提示', '找不到技能資料庫，無法執行分配。');
+                return;
+            }
+            const atkSkillsInDB = window.SFL_SKILLS_DB.filter(s => ['atk', 'debuff_atk', 'dot_atk'].includes(s.type));
+
+            // 2. 建立目標技能配置 (深拷貝選單 a)
+            const targetSkills = { ...(sourceSlot.skills || {}) };
+
+            // 3. 計算原配置中所有攻擊型技能等級之和
+            let originalAtkPoints = 0;
+            atkSkillsInDB.forEach(skill => {
+                const lvl = Number(targetSkills[skill.id] || 0);
+                originalAtkPoints += lvl;
+            });
+
+            // 4. 可分配到攻擊技能點數總和 = (所有攻擊技能點數總和) + (totalSkillPoints)
+            const originalTotalPoints = Number(sourceSlot.totalSkillPoints || 0);
+            let totalAttackPoints = originalAtkPoints + originalTotalPoints;
+            const absoluteTotalPoints = totalAttackPoints; // 備份總額
+
+            // 5. 將所有攻擊技能重置為 1 等，並扣掉這些 1 等點數 (每個攻擊技能扣 1 點)
+            atkSkillsInDB.forEach(skill => {
+                targetSkills[skill.id] = 1;
+                totalAttackPoints -= 1;
+            });
+            totalAttackPoints = Math.max(0, totalAttackPoints); // 確保防呆，不小於 0
+
+            // 獲取當前設定下的技能效益排行
+            const ranks = window.currentSkillEfficiencyRanks || [];
+            if (ranks.length === 0) {
+                await window.showCustomAlert('⚠️ 效益排行遺失', '當前無可供分配的技能排行，請確保在上方「技能效益計算」中有成功的排行結果。');
+                return;
+            }
+
+            // 獲取艦船等級加成
+            const shipLevel = fastShipSelect ? fastShipSelect.value : '0';
+            let shipBonus = 0;
+            if (shipLevel === '1') shipBonus = 10;
+            else if (shipLevel === '3') shipBonus = 20;
+
+            let allocatedCount = 0;
+            let detailLog = [];
+
+            // 6. 依據效益高低排序分派剩餘的攻擊技能點數
+            if (totalAttackPoints > 0) {
+                for (let i = 0; i < ranks.length; i++) {
+                    const rankItem = ranks[i];
+                    // 找出技能 id 與 maxlvl
+                    const skillObj = window.SFL_SKILLS_DB.find(s => s.name === rankItem.name);
+                    if (!skillObj) continue;
+
+                    const sId = skillObj.id;
+                    const maxLvl = Number(skillObj.maxlvl || 10);
+                    const limit = maxLvl + shipBonus;
+
+                    const currentLvl = Number(targetSkills[sId] || 1); // 當前重置後是 1
+
+                    if (currentLvl < limit) {
+                        const needed = limit - currentLvl;
+                        if (totalAttackPoints >= needed) {
+                            targetSkills[sId] = limit;
+                            totalAttackPoints -= needed;
+                            allocatedCount += needed;
+                            detailLog.push(`【${rankItem.name}】重設 1 級後，升滿至 ${limit} 級 (分配 ${needed} 點)`);
+                        } else {
+                            targetSkills[sId] = currentLvl + totalAttackPoints;
+                            allocatedCount += totalAttackPoints;
+                            detailLog.push(`【${rankItem.name}】重設 1 級後，升至 ${currentLvl + totalAttackPoints} 級 (分配全部剩餘 ${totalAttackPoints} 點)`);
+                            totalAttackPoints = 0;
+                        }
+                    }
+
+                    if (totalAttackPoints <= 0) break;
+                }
+            }
+
+            // 寫回儲存分頁 (選單 b)
+            if (!fastDecodedData.sfl_skill_loadouts[saveSlotId]) {
+                fastDecodedData.sfl_skill_loadouts[saveSlotId] = {
+                    skills: {},
+                    playerLevel: sourceSlot.playerLevel || 429
+                };
+            }
+
+            fastDecodedData.sfl_skill_loadouts[saveSlotId].skills = targetSkills;
+            
+            // 依要求將新的配置儲存，並強制設定 totalSkillPoints 為 0
+            fastDecodedData.sfl_skill_loadouts[saveSlotId].totalSkillPoints = 0;
+            fastDecodedData.sfl_skill_loadouts[saveSlotId].availableStatPoints = 0; // 同時清空可能存在的剩餘點數欄位
+            fastDecodedData.sfl_skill_loadouts[saveSlotId].timestamp = Date.now();
+
+            // 觸發全域 SFL 資料同步
+            const currentFilename = window.sflFilename || 'backup.sfl';
+            window.sflDecodedData = fastDecodedData;
+            window.dispatchEvent(new CustomEvent('sfl-data-loaded', {
+                detail: { data: fastDecodedData, filename: currentFilename, source: 'fast-import' }
+            }));
+
+            // 先跳出確認通知，使用者按確定才開始下載，按取消則終止下載
+            let msg = `可分配攻擊技能點數總和: ${absoluteTotalPoints} 點 (其中重設 1 級保留消耗了 ${absoluteTotalPoints - totalAttackPoints - allocatedCount} 點，分配了 ${allocatedCount} 點，剩餘 ${totalAttackPoints} 點)。\n\n您是否要下載優化後的 .sfl 備份檔案？`;
+            if (detailLog.length > 0) {
+                msg += `\n\n升級詳情:\n` + detailLog.join('\n');
+            }
+            
+            const isConfirmed = await showCustomConfirm('✅ 快速導入成功！', msg);
+            if (!isConfirmed) {
+                if (typeof window.showToast === 'function') {
+                    window.showToast('已取消下載備份檔！');
+                }
+                return; // 直接中止，不觸發下載
+            }
+
+            // 自動編碼下載
+            try {
+                const encoded = encodeExportDataFast(fastDecodedData);
+                const blob = new Blob([encoded], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const originalName = currentFilename.replace('.sfl', '');
+                a.href = url;
+                a.download = `${originalName}_fast_imported.sfl`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                if (typeof window.showToast === 'function') {
+                    window.showToast('優化分配成功，備份檔已下載！');
+                }
+            } catch (e) {
+                console.error(e);
+                await window.showCustomAlert('❌ 匯出失敗提示', '點數分配成功，但自動匯出下載失敗: ' + e.message);
+            }
+        });
+    }
 
     // Expose globally for app.js tab-switch trigger
     window.calculateSkillUpgrades = calculateUpgradeEfficiency;
