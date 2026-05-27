@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const enemyAttr2Select = document.getElementById('enemy-attr-2');
     const totalActionsInput = document.getElementById('total-actions');
     const tinisToggle = document.getElementById('tinis-toggle');
+    const futureDebuffToggle = document.getElementById('future-debuff-toggle');
     const genesisControl = document.getElementById('genesis-control');
     const genesisHint = document.getElementById('genesis-bonus-hint');
     const skillListContainer = document.getElementById('skill-upgrade-ranks');
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (enemyAttr2Select && s.eAttr2 !== undefined) enemyAttr2Select.value = s.eAttr2;
             if (totalActionsInput && s.totalActions !== undefined) totalActionsInput.value = s.totalActions;
             if (tinisToggle && s.tinis !== undefined) tinisToggle.checked = s.tinis;
+            if (futureDebuffToggle && s.futureDebuff !== undefined) futureDebuffToggle.checked = s.futureDebuff;
             if (genesisControl && s.genesis !== undefined) genesisControl.value = s.genesis;
             if (detailsToggle && s.details !== undefined) detailsToggle.checked = s.details;
         } catch (e) {
@@ -43,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             eAttr2: enemyAttr2Select ? enemyAttr2Select.value : '無',
             totalActions: totalActionsInput ? totalActionsInput.value : '10',
             tinis: tinisToggle ? tinisToggle.checked : false,
+            futureDebuff: futureDebuffToggle ? futureDebuffToggle.checked : false,
             genesis: genesisControl ? genesisControl.value : 'none',
             details: detailsToggle ? detailsToggle.checked : true
         };
@@ -63,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSettings();
 
         // Attach listeners
-        [enemyAttr1Select, enemyAttr2Select, tinisToggle, genesisControl, detailsToggle].forEach(el => {
+        [enemyAttr1Select, enemyAttr2Select, tinisToggle, futureDebuffToggle, genesisControl, detailsToggle].forEach(el => {
             if (el) {
                 el.addEventListener('change', calculateUpgradeEfficiency);
             }
@@ -100,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const eAttr2 = enemyAttr2Select.value;
         const totalActions = parseInt(totalActionsInput.value) || 10;
         const isTinisActive = tinisToggle ? tinisToggle.checked : false;
+        const isFutureDebuffActive = futureDebuffToggle ? futureDebuffToggle.checked : false;
 
         // Map Genesis control selection values
         let elementBonus = 0.00;
@@ -168,7 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 skillCD = Math.max(0, skillCD - 1);
             }
 
-            const numUses = countUses(skillWaitRound, skillCD, totalActions);
+            let numUses = countUses(skillWaitRound, skillCD, totalActions);
+            if (isFutureDebuffActive && ((skill.element || []).includes('all') || skill.type === 'dot_atk')) {
+                numUses = 0;
+            }
             const efficiency = growthRate * numUses * totalMultiplier;
 
             results.push({
@@ -568,7 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             fastDecodedData.sfl_skill_loadouts[saveSlotId].skills = targetSkills;
-            
+
             // 依要求將新的配置儲存，並強制設定 totalSkillPoints 為 0
             fastDecodedData.sfl_skill_loadouts[saveSlotId].totalSkillPoints = 0;
             fastDecodedData.sfl_skill_loadouts[saveSlotId].availableStatPoints = 0; // 同時清空可能存在的剩餘點數欄位
@@ -586,8 +593,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (detailLog.length > 0) {
                 msg += `\n\n升級詳情:\n` + detailLog.join('\n');
             }
-            
-            const isConfirmed = await showCustomConfirm('✅ 快速導入成功！', msg);
+
+            const isConfirmed = await showCustomConfirm('✅ 導入配置計算完成！', msg);
             if (!isConfirmed) {
                 if (typeof window.showToast === 'function') {
                     window.showToast('已取消下載備份檔！');
