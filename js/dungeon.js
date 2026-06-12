@@ -172,6 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (bonus.accuracy) stats.hit_rate += (bonus.accuracy * 100);
         if (bonus.penetrate) stats.shield_pen += bonus.penetrate;
         if (bonus.other_bonus) stats.bonus_dmg += (bonus.other_bonus * 100);
+        if (bonus.type_heal_wait_round_reduce) {
+            stats.type_heal_wait_round_reduce = (stats.type_heal_wait_round_reduce || 0) + bonus.type_heal_wait_round_reduce;
+        }
     }
     window.applyCardBonusToStats = applyCardBonusToStats;
 
@@ -211,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (bonus.accuracy) bonusParts.push(`命+${Math.round(bonus.accuracy * 100)}%`);
                     if (bonus.penetrate) bonusParts.push(`穿+${bonus.penetrate}`);
                     if (bonus.other_bonus) bonusParts.push(`傷+${Math.round(bonus.other_bonus * 100)}%`);
+                    if (bonus.type_heal_wait_round_reduce) bonusParts.push(`治縮-${bonus.type_heal_wait_round_reduce}`);
                 }
                 const bonusStr = bonusParts.length > 0 ? ` [${bonusParts.join(', ')}]` : '';
                 const statusStr = isSelectedElsewhere ? ' (已在其他插槽使用)' : '';
@@ -742,6 +746,23 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (diff <= -7) player.lvMulti = 0.5;
             else player.lvMulti = 1.0 + (diff * (0.5 / 7));
 
+            // Calculate card-based type_heal_wait_round_reduce
+            let healCdReduce = 0;
+            for (let slotIdx = 1; slotIdx <= 5; slotIdx++) {
+                const cardId = player[`card-slot-${slotIdx}`];
+                const level = player[`card-lv-${slotIdx}`] || 5;
+                if (cardId && level && window.SFL_CARDS_DB) {
+                    const cardData = window.SFL_CARDS_DB.find(c => c.id === cardId);
+                    if (cardData && cardData.value && cardData.value[level]) {
+                        const bonus = cardData.value[level];
+                        if (bonus.type_heal_wait_round_reduce) {
+                            healCdReduce += bonus.type_heal_wait_round_reduce;
+                        }
+                    }
+                }
+            }
+            player.type_heal_wait_round_reduce = healCdReduce;
+
             return player;
         });
 
@@ -879,7 +900,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             tp.hp = Math.min(tp.maxHp, tp.hp + healAmt);
                             if (verbose) battleLog(`[玩家 ${actor.id}] 💚 使用 ${skillToUse.name}！為 玩家 ${tIdx + 1} 補回 ${Math.floor(healAmt).toLocaleString()} 生命 (${Math.floor(prevHp).toLocaleString()} -> ${Math.floor(tp.hp).toLocaleString()})`, 'success');
                         });
-                        p.skillCDs[skillToUse.name] = (sData.cd || 0) + 1;
+                        const rawCd = sData.cd || 0;
+                        const reducedCd = Math.max(0, rawCd - (p.type_heal_wait_round_reduce || 0));
+                        p.skillCDs[skillToUse.name] = reducedCd + 1;
+                        if (verbose && (p.type_heal_wait_round_reduce || 0) > 0) {
+                            battleLog(`[系統] 治療縮減生效：${skillToUse.name} 冷卻縮減了 ${p.type_heal_wait_round_reduce} 回合 (當前冷卻: ${reducedCd} 回合)。`, 'info');
+                        }
                     } else if (skillToUse.type === 'buff') {
                         const bValue = typeof sData.multi === 'function' ? sData.multi(skillToUse.lv, p) : (sData.multi || 1.0);
                         p.activeBuffs.push({ name: skillToUse.name, effect: sData.effect, value: bValue, dur: sData.dur, pending: true });

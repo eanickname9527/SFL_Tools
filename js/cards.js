@@ -15,7 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'other_bonus': '額外傷害',
         'luck': '運氣值',
         'star_point': '星值',
-        'demonic_miasma_reduce': '魔瘴侵蝕'
+        'demonic_miasma_reduce': '魔瘴侵蝕',
+        'type_heal_wait_round_reduce': '治療型等待回合縮減'
     };
 
     const PERCENT_ATTRS = ['accuracy', 'other_bonus', 'evade'];
