@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const skillListContainer = document.getElementById('skill-upgrade-ranks');
     const saveBtn = document.getElementById('skills-save-btn');
     const detailsToggle = document.getElementById('details-toggle');
+    const disabledSkills = new Set();
 
     const getStorageKey = (key) => {
         const pathPrefix = window.location.pathname.replace(/\/[^\/]*$/, '/');
@@ -23,18 +24,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load saved settings from localStorage
     function loadSettings() {
         const saved = localStorage.getItem(getStorageKey('settings'));
-        if (!saved) return;
-        try {
-            const s = JSON.parse(saved);
-            if (enemyAttr1Select && s.eAttr1 !== undefined) enemyAttr1Select.value = s.eAttr1;
-            if (enemyAttr2Select && s.eAttr2 !== undefined) enemyAttr2Select.value = s.eAttr2;
-            if (totalActionsInput && s.totalActions !== undefined) totalActionsInput.value = s.totalActions;
-            if (tinisToggle && s.tinis !== undefined) tinisToggle.checked = s.tinis;
-            if (futureDebuffToggle && s.futureDebuff !== undefined) futureDebuffToggle.checked = s.futureDebuff;
-            if (genesisControl && s.genesis !== undefined) genesisControl.value = s.genesis;
-            if (detailsToggle && s.details !== undefined) detailsToggle.checked = s.details;
-        } catch (e) {
-            // Ignore corrupted data
+        if (saved) {
+            try {
+                const s = JSON.parse(saved);
+                if (enemyAttr1Select && s.eAttr1 !== undefined) enemyAttr1Select.value = s.eAttr1;
+                if (enemyAttr2Select && s.eAttr2 !== undefined) enemyAttr2Select.value = s.eAttr2;
+                if (totalActionsInput && s.totalActions !== undefined) totalActionsInput.value = s.totalActions;
+                if (tinisToggle && s.tinis !== undefined) tinisToggle.checked = s.tinis;
+                if (futureDebuffToggle && s.futureDebuff !== undefined) futureDebuffToggle.checked = s.futureDebuff;
+                if (genesisControl && s.genesis !== undefined) genesisControl.value = s.genesis;
+                if (detailsToggle && s.details !== undefined) detailsToggle.checked = s.details;
+            } catch (e) {
+                // Ignore corrupted data
+            }
+        }
+
+        // 載入關閉的技能
+        const savedDisabled = localStorage.getItem(getStorageKey('disabled_skills'));
+        if (savedDisabled) {
+            try {
+                const list = JSON.parse(savedDisabled);
+                if (Array.isArray(list)) {
+                    disabledSkills.clear();
+                    list.forEach(id => disabledSkills.add(id));
+                }
+            } catch (e) {
+                // Ignore
+            }
         }
     }
 
@@ -78,6 +94,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (saveBtn) {
             saveBtn.addEventListener('click', saveSettings);
+        }
+
+        // 註冊全部啟用與全部關閉按鈕事件
+        const enableAllBtn = document.getElementById('skills-enable-all-btn');
+        const disableAllBtn = document.getElementById('skills-disable-all-btn');
+
+        if (enableAllBtn) {
+            enableAllBtn.addEventListener('click', () => {
+                disabledSkills.clear();
+                localStorage.setItem(getStorageKey('disabled_skills'), JSON.stringify([]));
+                calculateUpgradeEfficiency();
+            });
+        }
+
+        if (disableAllBtn) {
+            disableAllBtn.addEventListener('click', () => {
+                if (window.SFL_SKILLS_DB) {
+                    window.SFL_SKILLS_DB.filter(s => ['atk', 'debuff_atk', 'dot_atk'].includes(s.type)).forEach(skill => {
+                        disabledSkills.add(skill.id);
+                    });
+                    localStorage.setItem(getStorageKey('disabled_skills'), JSON.stringify(Array.from(disabledSkills)));
+                    calculateUpgradeEfficiency();
+                }
+            });
+        }
+
+        // 註冊開關事件監聽 (事件委託)
+        if (skillListContainer) {
+            skillListContainer.addEventListener('change', (event) => {
+                if (event.target && event.target.classList.contains('skill-toggle-input')) {
+                    const skillId = event.target.getAttribute('data-skill-id');
+                    const isChecked = event.target.checked;
+                    if (isChecked) {
+                        disabledSkills.delete(skillId);
+                    } else {
+                        disabledSkills.add(skillId);
+                    }
+                    localStorage.setItem(getStorageKey('disabled_skills'), JSON.stringify(Array.from(disabledSkills)));
+                    calculateUpgradeEfficiency();
+                }
+            });
         }
 
         // Initial Calculation
@@ -179,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const efficiency = growthRate * numUses * totalMultiplier;
 
             results.push({
+                id: skill.id,
                 name: skill.name,
                 attr: displayAttr,
                 ub: skillWaitRound,
@@ -186,17 +244,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 numUses,
                 multiplier: totalMultiplier,
                 efficiency: efficiency,
-                growth: growthRate
+                growth: growthRate,
+                disabled: disabledSkills.has(skill.id)
             });
         });
 
-        // Rank by efficiency from high to low
-        results.sort((a, b) => b.efficiency - a.efficiency);
+        // 區分啟用與禁用的技能
+        const activeResults = results.filter(r => !r.disabled);
+        const disabledResults = results.filter(r => r.disabled);
+
+        // 僅對啟用的技能進行效益排序 (高到低)
+        activeResults.sort((a, b) => b.efficiency - a.efficiency);
+
+        // 合併結果，排序後的啟用技能在前，禁用技能在後
+        const finalResults = [...activeResults, ...disabledResults];
 
         // Expose current efficiency ranks globally for the fast-import tool
-        window.currentSkillEfficiencyRanks = results;
+        window.currentSkillEfficiencyRanks = finalResults;
 
-        renderRanks(results);
+        renderRanks(finalResults);
     }
 
     // 4. Render Rank Layout
@@ -242,21 +308,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Apply HSL colors for higher ranks to make it feel extremely premium
                 let borderStyle = 'border: 1px solid var(--border-glass);';
                 let rankBadgeClass = 'rank-badge-normal';
-                if (index === 0) {
-                    borderStyle = 'border: 1px solid rgba(255, 210, 63, 0.4); background: rgba(255, 210, 63, 0.08);';
-                    rankBadgeClass = 'rank-badge-gold';
-                } else if (index === 1) {
-                    borderStyle = 'border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.08);';
-                    rankBadgeClass = 'rank-badge-silver';
-                } else if (index === 2) {
-                    borderStyle = 'border: 1px solid rgba(78, 201, 176, 0.4); background: rgba(78, 201, 176, 0.08);';
-                    rankBadgeClass = 'rank-badge-bronze';
+                let rankText = `#${index + 1}`;
+                let opacityStyle = '';
+
+                if (skill.disabled) {
+                    borderStyle = 'border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.02);';
+                    rankBadgeClass = 'rank-badge-disabled';
+                    rankText = '關閉';
+                    opacityStyle = 'opacity: 0.55;';
+                } else {
+                    if (index === 0) {
+                        borderStyle = 'border: 1px solid rgba(255, 210, 63, 0.4); background: rgba(255, 210, 63, 0.08);';
+                        rankBadgeClass = 'rank-badge-gold';
+                    } else if (index === 1) {
+                        borderStyle = 'border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.08);';
+                        rankBadgeClass = 'rank-badge-silver';
+                    } else if (index === 2) {
+                        borderStyle = 'border: 1px solid rgba(78, 201, 176, 0.4); background: rgba(78, 201, 176, 0.08);';
+                        rankBadgeClass = 'rank-badge-bronze';
+                    }
                 }
 
                 return `
-                    <div class="skill-card" style="${borderStyle} padding: 16px; border-radius: 12px; backdrop-filter: blur(10px); display: flex; flex-direction: column; gap: 12px; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    <div class="skill-card" style="${borderStyle} padding: 16px; border-radius: 12px; backdrop-filter: blur(10px); display: flex; flex-direction: column; gap: 12px; transition: transform 0.2s ease, box-shadow 0.2s ease; ${opacityStyle}">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="skill-rank-badge ${rankBadgeClass}">#${index + 1}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="skill-rank-badge ${rankBadgeClass}">${rankText}</span>
+                                <label class="skill-switch" title="啟用/關閉排序">
+                                    <input type="checkbox" class="skill-toggle-input" data-skill-id="${skill.id}" ${skill.disabled ? '' : 'checked'}>
+                                    <span class="skill-slider"></span>
+                                </label>
+                            </div>
                             <span style="font-size: 0.8rem; padding: 2px 8px; border-radius: 99px; background: ${attrStyle.bg}; color: ${attrStyle.color}; border: 1px solid ${attrStyle.color}33; font-weight: 600;">
                                 ${skill.attr} 屬性
                             </span>
@@ -285,21 +367,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let borderStyle = 'border: 1px solid var(--border-glass);';
                 let rankBadgeClass = 'rank-badge-normal';
-                if (index === 0) {
-                    borderStyle = 'border: 1px solid rgba(255, 210, 63, 0.4); background: rgba(255, 210, 63, 0.08);';
-                    rankBadgeClass = 'rank-badge-gold';
-                } else if (index === 1) {
-                    borderStyle = 'border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.08);';
-                    rankBadgeClass = 'rank-badge-silver';
-                } else if (index === 2) {
-                    borderStyle = 'border: 1px solid rgba(78, 201, 176, 0.4); background: rgba(78, 201, 176, 0.08);';
-                    rankBadgeClass = 'rank-badge-bronze';
+                let rankText = `#${index + 1}`;
+                let opacityStyle = '';
+
+                if (skill.disabled) {
+                    borderStyle = 'border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.02);';
+                    rankBadgeClass = 'rank-badge-disabled';
+                    rankText = '關閉';
+                    opacityStyle = 'opacity: 0.55;';
+                } else {
+                    if (index === 0) {
+                        borderStyle = 'border: 1px solid rgba(255, 210, 63, 0.4); background: rgba(255, 210, 63, 0.08);';
+                        rankBadgeClass = 'rank-badge-gold';
+                    } else if (index === 1) {
+                        borderStyle = 'border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.08);';
+                        rankBadgeClass = 'rank-badge-silver';
+                    } else if (index === 2) {
+                        borderStyle = 'border: 1px solid rgba(78, 201, 176, 0.4); background: rgba(78, 201, 176, 0.08);';
+                        rankBadgeClass = 'rank-badge-bronze';
+                    }
                 }
 
                 return `
-                    <div class="skill-card-compact" style="${borderStyle}">
-                        <span class="skill-rank-badge ${rankBadgeClass}" style="min-width: 42px; text-align: center;">#${index + 1}</span>
-                        <h4 style="font-size: 1.05rem; margin: 0; font-weight: bold; color: var(--text-main);">${skill.name}</h4>
+                    <div class="skill-card-compact" style="${borderStyle} ${opacityStyle}">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="skill-rank-badge ${rankBadgeClass}" style="min-width: 42px; text-align: center;">${rankText}</span>
+                            <label class="skill-switch" title="啟用/關閉排序">
+                                <input type="checkbox" class="skill-toggle-input" data-skill-id="${skill.id}" ${skill.disabled ? '' : 'checked'}>
+                                <span class="skill-slider"></span>
+                            </label>
+                        </div>
+                        <h4 style="font-size: 1.05rem; margin: 0; font-weight: bold; color: var(--text-main); flex-grow: 1;">${skill.name}</h4>
                         <span style="font-size: 0.8rem; padding: 2px 8px; border-radius: 99px; background: ${attrStyle.bg}; color: ${attrStyle.color}; border: 1px solid ${attrStyle.color}33; font-weight: 600;">
                             ${skill.attr} 屬性
                         </span>
@@ -619,10 +717,13 @@ document.addEventListener('DOMContentLoaded', () => {
             let allocatedCount = 0;
             let detailLog = [];
 
-            // 6. 依據效益高低排序分派剩餘的攻擊技能點數
+            // 6. 依據效益高低排序分派剩餘 of the attack skills' points
             if (totalAttackPoints > 0) {
                 for (let i = 0; i < ranks.length; i++) {
                     const rankItem = ranks[i];
+                    // 跳過禁用的技能，不參與點數分配
+                    if (rankItem.disabled) continue;
+
                     // 找出技能 id 與 maxlvl
                     const skillObj = window.SFL_SKILLS_DB.find(s => s.name === rankItem.name);
                     if (!skillObj) continue;
