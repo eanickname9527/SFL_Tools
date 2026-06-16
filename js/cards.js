@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'luck': '運氣值',
         'star_point': '星值',
         'demonic_miasma_reduce': '魔瘴侵蝕',
-        'type_heal_wait_round_reduce': '治療型等待回合縮減'
+        'type_heal_wait_round_reduce': '治療型等待回合縮減',
+        'type_atk_wait_round_reduce': '攻擊型等待回合縮減'
     };
 
     const PERCENT_ATTRS = ['accuracy', 'other_bonus', 'evade'];
@@ -107,7 +108,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Attribute Filter
             if (selectedAttribute !== 'all') {
-                const sampleVal = card.value?.['5'] || card.value?.['1'] || {};
+                const cardLevels = card.value ? Object.keys(card.value).map(Number).sort((a,b)=>a-b) : [5];
+                const maxLevel = cardLevels[cardLevels.length - 1] || 5;
+                const sampleVal = card.value?.[String(maxLevel)] || card.value?.['1'] || {};
                 const hasAttr = Object.keys(sampleVal).some(key => (ATTR_MAPPING[key] || key) === selectedAttribute);
                 if (!hasAttr) return false;
             }
@@ -119,7 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedSortAttr !== 'original') {
             filtered.sort((a, b) => {
                 const getVal = (card) => {
-                    const valData = card.value?.['5'] || card.value?.['1'] || {};
+                    const cardLevels = card.value ? Object.keys(card.value).map(Number).sort((a,b)=>a-b) : [5];
+                    const maxLevel = cardLevels[cardLevels.length - 1] || 5;
+                    const valData = card.value?.[String(maxLevel)] || card.value?.['1'] || {};
                     // Find database key that maps to selectedSortAttr
                     const dbKey = Object.keys(ATTR_MAPPING).find(k => ATTR_MAPPING[k] === selectedSortAttr);
                     const val = dbKey ? valData[dbKey] : undefined;
@@ -150,7 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const chapter = getCardChapter(card.name);
             cardEl.dataset.chapter = chapter;
-            const currentLevel = 5;
+
+            const cardLevels = card.value ? Object.keys(card.value).map(Number).sort((a,b)=>a-b) : [1,2,3,4,5];
+            const currentLevel = cardLevels[cardLevels.length - 1] || 5;
+            const levelOptions = cardLevels.map(lv => `<option value="${lv}" ${lv === currentLevel ? 'selected' : ''}>等級 ${lv}</option>`).join('');
 
             // Extract clean display name
             const typeMatch = card.name.match(/^\[(.*?)\](.*)$/);
@@ -172,11 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <!-- Attributes filled dynamically -->
                     </div>
                     <select class="level-selector" id="lvl-select-${card.id}">
-                        <option value="1">等級 1</option>
-                        <option value="2">等級 2</option>
-                        <option value="3">等級 3</option>
-                        <option value="4">等級 4</option>
-                        <option value="5" selected>等級 5</option>
+                        ${levelOptions}
                     </select>
                 </div>
             `;
