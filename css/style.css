@@ -1535,8 +1535,35 @@ input:checked+.slider:before {
 }
 
 .fast-import-desc {
-    color: var(--accent) !important;
-    margin: 0;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.6;
+    margin: 0 0 20px 0;
+    padding: 12px 16px;
+    background: rgba(255, 14, 14, 0.12);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+}
+
+.fast-import-desc b {
+    color: #ff9800;
+    background: rgba(255, 152, 0, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 152, 0, 0.25);
+    font-weight: 700;
+    margin: 0 2px;
+}
+
+.fast-import-title {
+    font-weight: 700;
+    color: #ff9800;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
 }
 
 .controls-row.align-bottom {
@@ -1586,4 +1613,60 @@ input:checked+.slider:before {
     border-top: 1px solid var(--border-glass);
     padding-top: 10px;
     margin-top: 5px;
+}
+
+/* === 技能優化器啟用/關閉開關與禁用 Rank 樣式 === */
+.skill-switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 20px;
+    margin: 0;
+}
+
+.skill-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.skill-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    transition: .3s;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.skill-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: rgba(255, 255, 255, 0.4);
+    transition: .3s;
+    border-radius: 50%;
+}
+
+.skill-switch input:checked+.skill-slider {
+    background-color: rgba(126, 239, 243, 0.75);
+    border-color: #7eeff3;
+    box-shadow: 0 0 10px rgba(126, 239, 243, 0.45);
+}
+
+.skill-switch input:checked+.skill-slider:before {
+    transform: translateX(18px);
+    background-color: #ffffff;
+}
+
+.rank-badge-disabled {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-dim) !important;
 }

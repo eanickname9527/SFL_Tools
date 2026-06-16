@@ -475,7 +475,7 @@
                         </div>
                         <div class="filter-group">
                             <label for="total-actions">戰鬥回合次數</label>
-                            <input type="number" id="total-actions" value="10" min="1" max="999">
+                            <input type="number" id="total-actions" value="10" min="-1" max="999">
                         </div>
                     </div>
 
@@ -514,9 +514,15 @@
                                 <span class="slider"></span>
                             </label>
                         </div>
+                        <div class="filter-group filter-group-inline" style="gap: 8px; margin-left: auto;">
+                            <button class="btn secondary" id="skills-enable-all-btn"
+                                style="padding: 5px 12px; font-size: 0.85rem; height: 34px; border-radius: 8px; font-weight: 600;">技能全部啟用</button>
+                            <button class="btn btn-outline" id="skills-disable-all-btn"
+                                style="padding: 5px 12px; font-size: 0.85rem; height: 34px; border-radius: 8px; font-weight: 600; background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">技能全部關閉</button>
+                        </div>
                     </div>
 
-                    <!-- 快速導入SFL設定開關 
+                    <!-- 快速導入SFL設定開關 -->
                     <div class="skills-bonus-row sep-top">
                         <div class="filter-group filter-group-inline no-left-margin">
                             <label for="fast-import-toggle" class="fast-import-toggle-label">快速導入至SFL配置檔案</label>
@@ -526,12 +532,17 @@
                             </label>
                         </div>
                     </div>
-                    -->
+
 
                     <!-- 快速導入容器，預設隱藏 -->
                     <div id="fast-import-container" class="glass-panel fast-import-panel">
-                        <h3 class="fast-import-desc">說明:<br>會使用分頁A的基礎配置，將攻擊技能全部重置為1等後根據技能排序分配點數後儲存到分頁B (A和B可選同一個)
-                        </h3>
+                        <p class="fast-import-desc">
+                            <span class="fast-import-title">⚠️ 使用前的說明 ⚠️</span><br>
+                            為了不讓資料錯亂,使用前先確認以下事項:<br>
+                            1. 遊戲中需要先<b>[儲存技能]</b>,接著才能<b>[儲存技能分頁]</b>,否則會有技能點數量錯亂.<br>
+                            2. 遊戲中還不能點的技能,在這裡要手動把<b>技能框框內的[開關]</b>關閉,否則會有無效的加點.<br>
+                            3. 這裡的載入的技能分頁和匯出的技能分頁可以選同一個(直接覆蓋).
+                        </p>
 
                         <div class="controls-row align-bottom">
                             <div class="filter-group w-220">
@@ -552,13 +563,13 @@
 
                         <div class="controls-row align-bottom">
                             <div class="filter-group w-200">
-                                <label for="fast-import-load-select">分頁 a：載入的技能配置</label>
+                                <label for="fast-import-load-select">載入的技能配置</label>
                                 <select id="fast-import-load-select" disabled class="select-full">
                                     <option value="">-- 請先載入 .sfl 檔案 --</option>
                                 </select>
                             </div>
                             <div class="filter-group w-200">
-                                <label for="fast-import-save-select">分頁 b：儲存的技能配置</label>
+                                <label for="fast-import-save-select">儲存的技能配置</label>
                                 <select id="fast-import-save-select" disabled class="select-full">
                                     <option value="">-- 請先載入 .sfl 檔案 --</option>
                                 </select>
