@@ -111,6 +111,9 @@
      * Encode SFL data back into safe Base64 format
      */
     function encodeExportData(data) {
+        // Clean and validate loadouts structure before final export encoding
+        sanitizeLoadouts(data);
+
         const jsonStr = JSON.stringify(data);
         const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
         let checksum = 0;
@@ -317,6 +320,91 @@
                 loadoutInfo.textContent = '⚠️ 請至少選擇一個分頁槽位進行導入。';
                 loadoutInfo.style.color = '#ffd23f';
             }
+    }
+
+    /**
+     * Sanitize loadouts structure to follow preset formats
+     */
+    function sanitizeLoadouts(data) {
+        if (!data) return;
+
+        // 1. sfl_stat_loadouts
+        if (data.sfl_stat_loadouts && typeof data.sfl_stat_loadouts === 'object') {
+            Object.keys(data.sfl_stat_loadouts).forEach(key => {
+                const slot = data.sfl_stat_loadouts[key];
+                if (slot && typeof slot === 'object') {
+                    const originalStats = slot.stats || {};
+                    const cleanSlot = {
+                        timestamp: typeof slot.timestamp === 'number' ? slot.timestamp : Date.now(),
+                        stats: {
+                            hp: typeof originalStats.hp === 'number' ? originalStats.hp : Number(originalStats.hp) || 0,
+                            attack: typeof originalStats.attack === 'number' ? originalStats.attack : Number(originalStats.attack) || 0,
+                            luck: typeof originalStats.luck === 'number' ? originalStats.luck : Number(originalStats.luck) || 0,
+                            atk_speed: typeof originalStats.atk_speed === 'number' ? originalStats.atk_speed : Number(originalStats.atk_speed) || 0
+                        },
+                        playerLevel: typeof slot.playerLevel === 'number' ? slot.playerLevel : 429,
+                        availableStatPoints: typeof slot.availableStatPoints === 'number' ? slot.availableStatPoints : 0
+                    };
+                    data.sfl_stat_loadouts[key] = cleanSlot;
+                }
+            });
+        }
+
+        // 2. sfl_skill_loadouts
+        if (data.sfl_skill_loadouts && typeof data.sfl_skill_loadouts === 'object') {
+            const defaultSkills = (window.SFL_SKILLS_DB && Array.isArray(window.SFL_SKILLS_DB)) 
+                ? window.SFL_SKILLS_DB.map(s => s.id) 
+                : [
+                    "slash", "fireball", "shadow_slash", "emergency_heal", "fighting_buff", 
+                    "evade_buff", "fire_arrow", "stone_bomb", "cursed_strike", "poison_blade", 
+                    "flame_sword", "spiritual_meditation", "lightning_curse", "elemental_convergence", 
+                    "acid_spray", "holy_star", "ultimate_strike", "divine_protection", "big_heal", 
+                    "Dawn", "tidal_slash", "corrosive_touch", "druid_wind_fist", "holy_light_slash", 
+                    "elemental_convergence_2", "absolute_judgment", "thunder_pulse", "fountain_of_eternity", 
+                    "accuraccy_buff", "dark_dragon_curse", "starfire_apocalypse", "void_erosion", 
+                    "star_crash_sword", "immortal_will", "thunder_god_roar", "water_erosion", 
+                    "soul_blessing", "savage_shock", "ultimate_burst", "starfall", 
+                    "order_judgment", "astral_end", "storm_hunt", "skybreak_strike", "photon_hack"
+                ];
+            Object.keys(data.sfl_skill_loadouts).forEach(key => {
+                const slot = data.sfl_skill_loadouts[key];
+                if (slot && typeof slot === 'object') {
+                    const originalSkills = slot.skills || {};
+                    const cleanSkills = {};
+                    defaultSkills.forEach(skillKey => {
+                        cleanSkills[skillKey] = typeof originalSkills[skillKey] === 'number' ? originalSkills[skillKey] : Number(originalSkills[skillKey]) || 0;
+                    });
+                    const cleanSlot = {
+                        timestamp: typeof slot.timestamp === 'number' ? slot.timestamp : Date.now(),
+                        skills: cleanSkills,
+                        playerLevel: typeof slot.playerLevel === 'number' ? slot.playerLevel : 429,
+                        totalSkillPoints: typeof slot.totalSkillPoints === 'number' ? slot.totalSkillPoints : 0
+                    };
+                    data.sfl_skill_loadouts[key] = cleanSlot;
+                }
+            });
+        }
+
+        // 3. sfl_card_loadouts
+        if (data.sfl_card_loadouts && typeof data.sfl_card_loadouts === 'object') {
+            const allowedCardKeys = ["1", "2", "3", "4", "5"];
+            Object.keys(data.sfl_card_loadouts).forEach(key => {
+                const slot = data.sfl_card_loadouts[key];
+                if (slot && typeof slot === 'object') {
+                    const originalCards = slot.cards || {};
+                    const cleanCards = {};
+                    allowedCardKeys.forEach(cardKey => {
+                        if (originalCards[cardKey] !== undefined) {
+                            cleanCards[cardKey] = originalCards[cardKey];
+                        }
+                    });
+                    const cleanSlot = {
+                        timestamp: typeof slot.timestamp === 'number' ? slot.timestamp : Date.now(),
+                        cards: cleanCards
+                    };
+                    data.sfl_card_loadouts[key] = cleanSlot;
+                }
+            });
         }
     }
 
