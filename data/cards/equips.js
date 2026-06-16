@@ -2074,6 +2074,63 @@ window.SFL_CARDS_DB =
             }
         },
         {
+            "id": "card_light_finder",
+            "name": "[副本卡片]追逐光的探險家",
+            "quality": "傳說",
+            "value": {
+                "1": {
+                    "penetrate": 50,
+                    "type_atk_wait_round_reduce": 1,
+                    "other_bonus": 0.1
+                },
+                "2": {
+                    "penetrate": 100,
+                    "type_atk_wait_round_reduce": 1,
+                    "other_bonus": 0.1
+                },
+                "3": {
+                    "penetrate": 150,
+                    "type_atk_wait_round_reduce": 1,
+                    "other_bonus": 0.1
+                },
+                "4": {
+                    "penetrate": 200,
+                    "type_atk_wait_round_reduce": 1,
+                    "other_bonus": 0.1
+                },
+                "5": {
+                    "penetrate": 250,
+                    "type_atk_wait_round_reduce": 1,
+                    "other_bonus": 0.1
+                },
+                "6": {
+                    "penetrate": 300,
+                    "type_atk_wait_round_reduce": 1,
+                    "other_bonus": 0.2
+                },
+                "7": {
+                    "penetrate": 300,
+                    "type_atk_wait_round_reduce": 1,
+                    "other_bonus": 0.3
+                },
+                "8": {
+                    "penetrate": 300,
+                    "type_atk_wait_round_reduce": 1,
+                    "other_bonus": 0.35
+                },
+                "9": {
+                    "penetrate": 300,
+                    "type_atk_wait_round_reduce": 2,
+                    "other_bonus": 0.35
+                },
+                "10": {
+                    "penetrate": 300,
+                    "type_atk_wait_round_reduce": 3,
+                    "other_bonus": 0.35
+                }
+            }
+        },
+        {
             "id": "card_abandoned_space_station",
             "name": "[副本卡片]厄里莫斯空洞：廢棄太空站",
             "quality": "罕見",

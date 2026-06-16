@@ -175,6 +175,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (bonus.type_heal_wait_round_reduce) {
             stats.type_heal_wait_round_reduce = (stats.type_heal_wait_round_reduce || 0) + bonus.type_heal_wait_round_reduce;
         }
+        if (bonus.type_atk_wait_round_reduce) {
+            stats.type_atk_wait_round_reduce = (stats.type_atk_wait_round_reduce || 0) + bonus.type_atk_wait_round_reduce;
+        }
     }
     window.applyCardBonusToStats = applyCardBonusToStats;
 
@@ -190,9 +193,41 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 1; i <= 5; i++) {
             const select = document.getElementById(`card-slot-${i}`);
             const levelSelect = document.getElementById(`card-lv-${i}`);
-            const level = levelSelect ? levelSelect.value : 5;
-            if (!select) continue;
+            if (!select || !levelSelect) continue;
 
+            // 1. 動態更新該插槽的等級選項
+            const cardId = select.value;
+            const currentSelectedLevel = Number(levelSelect.value || 5);
+            
+            let allowedLevels = [1, 2, 3, 4, 5];
+            if (cardId && window.SFL_CARDS_DB) {
+                const cardData = window.SFL_CARDS_DB.find(c => c.id === cardId);
+                if (cardData && cardData.value) {
+                    allowedLevels = Object.keys(cardData.value).map(Number).sort((a, b) => a - b);
+                }
+            }
+            
+            const oldOptionsStr = Array.from(levelSelect.options).map(o => o.value).join(',');
+            const newOptionsStr = allowedLevels.join(',');
+            if (oldOptionsStr !== newOptionsStr) {
+                levelSelect.innerHTML = '';
+                allowedLevels.forEach(lv => {
+                    const opt = document.createElement('option');
+                    opt.value = String(lv);
+                    opt.textContent = `等級 ${lv}`;
+                    levelSelect.appendChild(opt);
+                });
+                
+                // 恢復選取先前的等級，若超出新限制，則選取新範圍的最大等級
+                if (allowedLevels.includes(currentSelectedLevel)) {
+                    levelSelect.value = String(currentSelectedLevel);
+                } else {
+                    const maxLv = allowedLevels[allowedLevels.length - 1] || 5;
+                    levelSelect.value = String(maxLv);
+                }
+            }
+
+            const level = levelSelect.value;
             const currentValue = select.value;
             select.innerHTML = '<option value="">請選擇卡片</option>';
 
@@ -215,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (bonus.penetrate) bonusParts.push(`穿+${bonus.penetrate}`);
                     if (bonus.other_bonus) bonusParts.push(`傷+${Math.round(bonus.other_bonus * 100)}%`);
                     if (bonus.type_heal_wait_round_reduce) bonusParts.push(`治縮-${bonus.type_heal_wait_round_reduce}`);
+                    if (bonus.type_atk_wait_round_reduce) bonusParts.push(`攻縮-${bonus.type_atk_wait_round_reduce}`);
                 }
                 const bonusStr = bonusParts.length > 0 ? ` [${bonusParts.join(', ')}]` : '';
                 const statusStr = isSelectedElsewhere ? ' (已在其他插槽使用)' : '';
@@ -748,6 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Calculate card-based type_heal_wait_round_reduce
             let healCdReduce = 0;
+            let atkCdReduce = 0;
             for (let slotIdx = 1; slotIdx <= 5; slotIdx++) {
                 const cardId = player[`card-slot-${slotIdx}`];
                 const level = player[`card-lv-${slotIdx}`] || 5;
@@ -758,10 +795,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (bonus.type_heal_wait_round_reduce) {
                             healCdReduce += bonus.type_heal_wait_round_reduce;
                         }
+                        if (bonus.type_atk_wait_round_reduce) {
+                            atkCdReduce += bonus.type_atk_wait_round_reduce;
+                        }
                     }
                 }
             }
             player.type_heal_wait_round_reduce = healCdReduce;
+            player.type_atk_wait_round_reduce = atkCdReduce;
 
             return player;
         });
@@ -925,10 +966,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (skillToUse.name === '元素匯聚' || skillToUse.name === '元素匯聚．強') {
                             p.pendingSkill = { name: skillToUse.name, lv: skillToUse.lv, data: sData, countdown: 2, damageTaken: 0 };
                             if (verbose) battleLog(`[玩家 ${actor.id}] 🌀 開始引導蓄力 ${skillToUse.name}...`, 'info');
-                            p.skillCDs[skillToUse.name] = (sData.cd || 0) + 1;
+                            const rawCd = sData.cd || 0;
+                            const reducedCd = Math.max(0, rawCd - (p.type_atk_wait_round_reduce || 0));
+                            p.skillCDs[skillToUse.name] = reducedCd + 1;
+                            if (verbose && (p.type_atk_wait_round_reduce || 0) > 0) {
+                                battleLog(`[系統] 攻擊縮減生效：${skillToUse.name} 冷卻縮減了 ${p.type_atk_wait_round_reduce} 回合 (當前冷卻: ${reducedCd} 回合)。`, 'info');
+                            }
                         } else {
                             if (skillToUse.name !== '普攻') {
-                                p.skillCDs[skillToUse.name] = (sData.cd || 0) + 1;
+                                const rawCd = sData.cd || 0;
+                                const reducedCd = Math.max(0, rawCd - (p.type_atk_wait_round_reduce || 0));
+                                p.skillCDs[skillToUse.name] = reducedCd + 1;
+                                if (verbose && (p.type_atk_wait_round_reduce || 0) > 0) {
+                                    battleLog(`[系統] 攻擊縮減生效：${skillToUse.name} 冷卻縮減了 ${p.type_atk_wait_round_reduce} 回合 (當前冷卻: ${reducedCd} 回合)。`, 'info');
+                                }
                             }
                             let sMulti = typeof sData.multi === 'function' ? sData.multi(skillToUse.lv, p) : (sData.multi || 1.0);
                             const attrMulti = getFinalAttrMulti(sData.attr, e.attribute);
@@ -1025,7 +1076,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         if (verbose) battleLog(`[玩家 ${actor.id}] 使用 ${skillToUse.name} 攻擊，但被 BOSS 閃避！`, 'fail');
                         if (skillToUse.name !== '普攻') {
-                            p.skillCDs[skillToUse.name] = (sData.cd || 0) + 1;
+                            const rawCd = sData.cd || 0;
+                            const reducedCd = Math.max(0, rawCd - (p.type_atk_wait_round_reduce || 0));
+                            p.skillCDs[skillToUse.name] = reducedCd + 1;
+                            if (verbose && (p.type_atk_wait_round_reduce || 0) > 0) {
+                                battleLog(`[系統] 攻擊縮減生效：${skillToUse.name} 冷卻縮減了 ${p.type_atk_wait_round_reduce} 回合 (當前冷卻: ${reducedCd} 回合)。`, 'info');
+                            }
                         }
                     }
                 } else {

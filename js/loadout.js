@@ -263,7 +263,16 @@
                 const slotNum = parseInt(slot);
                 if (slotNum >= 1 && slotNum <= 5) {
                     updateInputValue(`card-slot-${slotNum}`, cid || '');
-                    updateInputValue(`card-lv-${slotNum}`, 5);
+                    
+                    // 動態決定最大等級
+                    let maxLvl = 5;
+                    if (cid && window.SFL_CARDS_DB) {
+                        const cardData = window.SFL_CARDS_DB.find(c => c.id === cid);
+                        if (cardData && cardData.value) {
+                            maxLvl = Math.max(...Object.keys(cardData.value).map(Number));
+                        }
+                    }
+                    updateInputValue(`card-lv-${slotNum}`, maxLvl);
                 }
             });
 
@@ -271,8 +280,9 @@
             Object.values(cards).forEach(cid => {
                 if (!cid) return;
                 const cardData = window.SFL_CARDS_DB ? window.SFL_CARDS_DB.find(c => c.id === cid) : null;
-                if (cardData && cardData.value && cardData.value["5"]) {
-                    const bonus = cardData.value["5"];
+                if (cardData && cardData.value) {
+                    const maxLvl = Math.max(...Object.keys(cardData.value).map(Number));
+                    const bonus = cardData.value[String(maxLvl)] || cardData.value["5"] || cardData.value["1"] || {};
                     if (window.applyCardBonusToStats) window.applyCardBonusToStats(finalStats, bonus);
                 }
             });
