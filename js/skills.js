@@ -694,10 +694,14 @@ document.addEventListener('DOMContentLoaded', () => {
             let totalAttackPoints = originalAtkPoints + originalTotalPoints;
             const absoluteTotalPoints = totalAttackPoints; // 備份總額
 
-            // 5. 將所有攻擊技能重置為 1 等，並扣掉這些 1 等點數 (每個攻擊技能扣 1 點)
+            // 5. 將所有攻擊技能重置為最低配置 (啟用技能為 1 等，禁用技能為 0 等)
             atkSkillsInDB.forEach(skill => {
-                targetSkills[skill.id] = 1;
-                totalAttackPoints -= 1;
+                if (disabledSkills.has(skill.id)) {
+                    targetSkills[skill.id] = 0;
+                } else {
+                    targetSkills[skill.id] = 1;
+                    totalAttackPoints -= 1;
+                }
             });
             totalAttackPoints = Math.max(0, totalAttackPoints); // 確保防呆，不小於 0
 
