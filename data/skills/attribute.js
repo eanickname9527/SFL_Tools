@@ -176,6 +176,8 @@ function getAttributeCombatCharacteristics(atkAttrStr, defAttrStr) {
     characteristics.true_damage = hasTrueDamage && !disableTrueDamage;
     characteristics.ignore_shield = hasIgnoreShield;
     characteristics.level_diff_max = hasLevelDiffMax;
+    characteristics.disable_true_damage = disableTrueDamage;
+    characteristics.disable_guaranteed_hit = disableGuaranteedHit;
 
     return characteristics;
 }

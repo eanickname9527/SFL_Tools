@@ -162,6 +162,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const isTinisActive = tinisToggle ? tinisToggle.checked : false;
         const isFutureDebuffActive = futureDebuffToggle ? futureDebuffToggle.checked : false;
 
+        // 偵測敵方是否具有 disable_true_damage 與 disable_guaranteed_hit 特性
+        let enemyDisableTrueDamage = false;
+        let enemyDisableGuaranteedHit = false;
+        if (typeof window.getAttributeCombatCharacteristics === 'function') {
+            const targetAttr = [eAttr1, eAttr2].filter(a => a && a !== '無').join('、');
+            const eChars = window.getAttributeCombatCharacteristics('', targetAttr);
+            enemyDisableTrueDamage = eChars.disable_true_damage || false;
+            enemyDisableGuaranteedHit = eChars.disable_guaranteed_hit || false;
+        }
+
         // Map Genesis control selection values
         let elementBonus = 0.00;
         const genesisVal = genesisControl ? genesisControl.value : 'none';
@@ -231,6 +241,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let numUses = countUses(skillWaitRound, skillCD, totalActions);
             if (isFutureDebuffActive && ((skill.element || []).includes('all') || skill.type === 'dot_atk')) {
+                numUses = 0;
+            }
+            if (enemyDisableTrueDamage && skill.type === 'dot_atk') {
+                numUses = 0;
+            }
+            if (enemyDisableGuaranteedHit && (skill.element || []).includes('all')) {
                 numUses = 0;
             }
             const efficiency = growthRate * numUses * totalMultiplier;
