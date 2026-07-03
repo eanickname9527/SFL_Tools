@@ -676,13 +676,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const processDots = (target, nameTag, isVerbose) => {
         if (!target.activeDots || target.activeDots.length === 0) return;
+        let disableTrueDamage = false;
+        if (typeof window.getAttributeCombatCharacteristics === 'function') {
+            const char = window.getAttributeCombatCharacteristics('', target.attribute || '無');
+            if (char.disable_true_damage) {
+                disableTrueDamage = true;
+            }
+        }
         target.activeDots.forEach(dot => {
             if (dot.dur > 0) {
                 const prevHp = target.hp;
-                target.hp -= dot.dmg;
+                const dmgDealt = disableTrueDamage ? 0 : dot.dmg;
+                target.hp -= dmgDealt;
                 dot.dur--;
-                if (isVerbose) battleLog(`[${nameTag}] 💀 ${dot.name} 造成 ${Math.floor(dot.dmg).toLocaleString()} 持續傷害 (${Math.floor(prevHp).toLocaleString()} -> ${Math.floor(Math.max(0, target.hp)).toLocaleString()}) (剩餘 ${dot.dur} 回合)`, 'fail');
-                if (target.pendingSkill) target.pendingSkill.damageTaken += dot.dmg;
+                if (isVerbose) {
+                    if (disableTrueDamage) {
+                        battleLog(`[${nameTag}] 💀 ${dot.name} 持續傷害被對方特性的「真實傷害禁用」免疫！(剩餘 ${dot.dur} 回合)`, 'info');
+                    } else {
+                        battleLog(`[${nameTag}] 💀 ${dot.name} 造成 ${Math.floor(dmgDealt).toLocaleString()} 持續傷害 (${Math.floor(prevHp).toLocaleString()} -> ${Math.floor(Math.max(0, target.hp)).toLocaleString()}) (剩餘 ${dot.dur} 回合)`, 'fail');
+                    }
+                }
+                if (target.pendingSkill) target.pendingSkill.damageTaken += dmgDealt;
             }
         });
         target.activeDots = target.activeDots.filter(d => d.dur > 0);
@@ -920,13 +934,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     let p_hit = pHitRate - eEva - ((e.luck || 0) * 0.004);
 
                     // 取得屬性攻防特性判定資料
-                    let attrChars = { guaranteed_hit: false, true_damage: false, ignore_shield: false, level_diff_max: false };
+                    let attrChars = { guaranteed_hit: false, true_damage: false, ignore_shield: false, level_diff_max: false, disable_true_damage: false };
                     if (typeof window.getAttributeCombatCharacteristics === 'function' && sData && sData.attr) {
                         attrChars = window.getAttributeCombatCharacteristics(sData.attr, e.attribute);
                     }
 
+                    let isTrueDamage = attrChars.true_damage || (sData && sData.true_damage);
+                    if (attrChars.disable_true_damage) {
+                        isTrueDamage = false;
+                    }
+
+                    const isDotSkill = !!(sData && (sData.dot || sData.type === 'dot_atk' || skillToUse.type === 'dot_atk'));
+                    const forceMiss = attrChars.disable_true_damage && isDotSkill;
+
                     // 判定必中技能與特性必定命中 (guaranteed hit，真實傷害亦視為必定命中)
-                    if (attrChars.guaranteed_hit || attrChars.true_damage || (sData && sData.true_damage)) {
+                    if (attrChars.guaranteed_hit || isTrueDamage) {
                         p_hit = 1000;
                     }
 
@@ -962,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             p.skillCDs[skillToUse.name] = (sData.cd || 0) + 1;
                             if (verbose) battleLog(`[玩家 ${actor.id}] 🚀 啟動了 ${skillToUse.name} 追擊模式！使用輸出型技能將有機會觸發追打`, 'info');
                         */
-                    } else if (Math.random() * 100 < p_hit) {
+                    } else if (!forceMiss && Math.random() * 100 < p_hit) {
                         if (skillToUse.name === '元素匯聚' || skillToUse.name === '元素匯聚．強') {
                             p.pendingSkill = { name: skillToUse.name, lv: skillToUse.lv, data: sData, countdown: 2, damageTaken: 0 };
                             if (verbose) battleLog(`[玩家 ${actor.id}] 🌀 開始引導蓄力 ${skillToUse.name}...`, 'info');
@@ -987,7 +1009,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             // 依據屬性特性計算傷害
                             let damage;
-                            if (attrChars.true_damage) {
+                            if (isTrueDamage) {
                                 // 真實傷害：必定命中，且無視所有傷害加成增減 (如增傷、攻速比例、等級差倍率、屬性克制、護盾減免)
                                 damage = pAtk * sMulti;
                             } else {
@@ -1000,7 +1022,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             const prevHp = e.hp;
                             e.hp -= damage;
 
-                            if (sData.dot) {
+                            // 若敵方未禁用真實傷害，才可施加 DOT 效果 (DOT 屬於真實傷害判定)
+                            if (sData.dot && !attrChars.disable_true_damage) {
                                 const dotDmg = sData.dot.damage_per_turn + (skillToUse.lv - 1) * (sData.dot.damage_per_level || 0);
                                 e.activeDots.push({
                                     name: sData.dot.name,
@@ -1074,7 +1097,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             */
                         }
                     } else {
-                        if (verbose) battleLog(`[玩家 ${actor.id}] 使用 ${skillToUse.name} 攻擊，但被 BOSS 閃避！`, 'fail');
+                        if (verbose) {
+                            if (forceMiss) {
+                                battleLog(`[玩家 ${actor.id}] 使用 ${skillToUse.name} 攻擊，但因敵方禁用真實傷害，帶有持續傷害的技能直接無法攻擊命中！`, 'fail');
+                            } else {
+                                battleLog(`[玩家 ${actor.id}] 使用 ${skillToUse.name} 攻擊，但被 BOSS 閃避！`, 'fail');
+                            }
+                        }
                         if (skillToUse.name !== '普攻') {
                             const rawCd = sData.cd || 0;
                             const reducedCd = Math.max(0, rawCd - (p.type_atk_wait_round_reduce || 0));
@@ -1102,8 +1131,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         const pEva = tp.evasion * getDebuffMulti(tp, 'evasion') * getBuffMulti(tp, 'evasion');
                         let e_hit = (e.hit_rate || 100) - pEva - ((tp.luck || 0) * 0.004);
 
+                        let isBossTrueDamage = eAttrChars.true_damage || skill.true_damage;
+                        if (eAttrChars.disable_true_damage) {
+                            isBossTrueDamage = false;
+                        }
+
+                        const isBossDotSkill = !!(skill.dot || skill.type === 'dot_atk');
+                        const bossForceMiss = eAttrChars.disable_true_damage && isBossDotSkill;
+
                         // 判斷是否必定命中或符合命中機率 (真實傷害亦視為必定命中)
-                        const isHit = eAttrChars.guaranteed_hit || eAttrChars.true_damage || (Math.random() * 100 < Math.max(2, e_hit));
+                        const isHit = !bossForceMiss && (eAttrChars.guaranteed_hit || isBossTrueDamage || (Math.random() * 100 < Math.max(2, e_hit)));
 
                         if (isHit) {
                             const attrMulti = getFinalAttrMulti(bossAtkAttr, '無') || 1.0;
@@ -1112,7 +1149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             // 依據屬性特性計算傷害
                             let damage;
-                            if (eAttrChars.true_damage) {
+                            if (isBossTrueDamage) {
                                 // 真實傷害：必定命中，且無視所有傷害加成增減
                                 damage = eAtk * skillMulti;
                             } else {
@@ -1166,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                             }
                             */
-                            if (skill.dot) tp.activeDots.push({ ...skill.dot });
+                            if (skill.dot && !eAttrChars.disable_true_damage) tp.activeDots.push({ ...skill.dot });
                             if (skill.debuff) {
                                 tp.activeDebuffs.push({
                                     name: skill.debuff.name,
@@ -1176,7 +1213,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 });
                             }
                         } else if (verbose) {
-                            battleLog(`[敵方] ${skill.name} 猛攻 玩家 ${pIdx + 1}，被玩家靈活翻滾閃避！`, 'info');
+                            if (bossForceMiss) {
+                                battleLog(`[敵方] ${skill.name} 猛攻 玩家 ${pIdx + 1}，但因玩家禁用真實傷害，帶有持續傷害的技能直接無法攻擊命中！`, 'info');
+                            } else {
+                                battleLog(`[敵方] ${skill.name} 猛攻 玩家 ${pIdx + 1}，被玩家靈活翻滾閃避！`, 'info');
+                            }
                         }
                     };
 
